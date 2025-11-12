@@ -1,5 +1,5 @@
 // sw.js — PMTiles offline con soporte de Range/HEAD correcto
-const CACHE_NAME = 'primavera-cache-v22';
+const CACHE_NAME = 'primavera-cache-v23';
 const PRECACHE = [
   './',
   './index.html',
@@ -7,6 +7,8 @@ const PRECACHE = [
   './app.js',
   './manifest.json',
   './libs/openlocationcode.js',
+  // Nota: NO pongas aquí una string fija distinta a la request real,
+  // el fetch usará la URL absoluta real y esa será la clave.
   './primavera.pmtiles'
 ];
 
@@ -19,54 +21,61 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => k === CACHE_NAME ? null : caches.delete(k)))
-    )
-  );
-  self.clients.claim();
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => k === CACHE_NAME ? null : caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
-async function getPmtilesBlob() {
+// Usa la MISMA request como clave de caché que llega en fetch
+async function getPmtilesBlobForRequest(req) {
   const cache = await caches.open(CACHE_NAME);
-  let resp = await cache.match('./primavera.pmtiles');
+
+  // 1) intentamos con la request exacta (URL absoluta con el subpath de GitHub Pages)
+  let resp = await cache.match(req);
+
+  // 2) fallback: por si en el PRECACHE quedó una ruta relativa tipo './primavera.pmtiles'
   if (!resp) {
-    const net = await fetch('./primavera.pmtiles', { cache: 'reload' });
-    await cache.put('./primavera.pmtiles', net.clone());
+    const rel = new Request('./primavera.pmtiles', { method: 'GET' });
+    resp = await cache.match(rel);
+  }
+
+  // 3) si aún no está, la traemos de la red y la guardamos usando LA request exacta
+  if (!resp) {
+    const net = await fetch(req, { cache: 'reload' });
+    await cache.put(req, net.clone());
     resp = net;
   }
+
   return await resp.blob();
 }
 
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const req = event.request;
+  const url = new URL(req.url);
 
-  // 1) Fuentes (glyphs) locales si las agregas después
-  if (url.pathname.startsWith('/fonts/')) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
-        const cached = await cache.match(event.request);
-        if (cached) return cached;
-        const resp = await fetch(event.request);
-        cache.put(event.request, resp.clone());
-        return resp;
-      })
-    );
+  // 1) Fuentes/glyphs locales (si luego las empaquetas). Usa includes o termina con .pbf
+  if (url.pathname.includes('/fonts/') || url.pathname.endsWith('.pbf')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(req);
+      if (cached) return cached;
+      const net = await fetch(req);
+      if (req.method === 'GET' && net.ok) await cache.put(req, net.clone());
+      return net;
+    })());
     return;
   }
 
-  // 2) PMTiles: HEAD / Range / GET normal
+  // 2) PMTiles: HEAD / Range / GET normal con la misma clave de request
   if (url.pathname.endsWith('.pmtiles')) {
-    const req = event.request;
-    const method = req.method;
-    const range = req.headers.get('Range');
-
     event.respondWith((async () => {
-      const blob = await getPmtilesBlob();
+      const blob = await getPmtilesBlobForRequest(req);
       const size = blob.size;
 
-      // HEAD: devolver sólo cabeceras, MapLibre usa esto para Content-Length
-      if (method === 'HEAD') {
+      // HEAD: MapLibre a veces lo usa para checar Content-Length
+      if (req.method === 'HEAD') {
         return new Response(null, {
           status: 200,
           headers: {
@@ -77,7 +86,7 @@ self.addEventListener('fetch', (event) => {
         });
       }
 
-      // GET con Range -> 206 Partial Content con el slice exacto
+      const range = req.headers.get('Range');
       if (range) {
         const m = /bytes=(\d+)-(\d+)?/.exec(range);
         const start = m && m[1] ? Number(m[1]) : 0;
@@ -94,7 +103,7 @@ self.addEventListener('fetch', (event) => {
         });
       }
 
-      // GET sin Range: devolver el archivo completo (con Accept-Ranges)
+      // GET completo sin Range
       return new Response(blob, {
         status: 200,
         headers: {
@@ -107,16 +116,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3) Cache-first simple para el resto
+  // 3) Cache-first para el resto de assets
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(event.request);
+    const cached = await cache.match(req);
     if (cached) return cached;
     try {
-      const net = await fetch(event.request);
-      // opcional: cachear assets GET navegables
-      if (event.request.method === 'GET' && net.ok) {
-        cache.put(event.request, net.clone());
+      const net = await fetch(req);
+      if (req.method === 'GET' && net.ok) {
+        await cache.put(req, net.clone());
       }
       return net;
     } catch {
