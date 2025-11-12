@@ -17,7 +17,7 @@ const map = new maplibregl.Map({
   style: {
     version: 8,
     // Para ver etiquetas online. Para 100% offline, luego empaquetamos glyphs locales.
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+    glyphs: "./fonts/{fontstack}/{range}.pbf",
     sources: {
       primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
     },
@@ -92,6 +92,7 @@ map.on('load', () => {
     'source-layer': 'place',
     layout: {
       'text-field': ['coalesce', ['get','name'], ['get','name:es'], ['get','name:en']],
+      'text-font': ['Noto Sans Regular'],
       'text-size': ['interpolate', ['linear'], ['zoom'], 10, 10, 14, 14]
     },
     paint: { 'text-color': '#2f3440', 'text-halo-color': '#eef3f6', 'text-halo-width': 1 }
@@ -102,7 +103,7 @@ map.on('load', () => {
     type: 'symbol',
     source: 'primavera',
     'source-layer': 'water_name',
-    layout: { 'text-field': ['get','name'], 'text-size': 12, 'symbol-placement': 'line' },
+    layout: { 'text-field': ['get','name'], 'text-size': 12, 'symbol-placement': 'line', 'text-font': ['Noto Sans Regular']},
     paint: { 'text-color': '#557a9e', 'text-halo-color': '#eef3f6', 'text-halo-width': 1 }
   });
 
@@ -111,7 +112,7 @@ map.on('load', () => {
     type: 'symbol',
     source: 'primavera',
     'source-layer': 'transportation_name',
-    layout: { 'text-field': ['get','name'], 'text-size': 11, 'symbol-placement': 'line' },
+    layout: { 'text-field': ['get','name'], 'text-size': 11, 'symbol-placement': 'line', 'text-font': ['Noto Sans Regular']},
     paint: { 'text-color': '#555', 'text-halo-color': '#fff', 'text-halo-width': 0.5 }
   });
 });
