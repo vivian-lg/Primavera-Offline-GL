@@ -12,12 +12,13 @@ jobs:
 
       - name: Bounds & zoom
         run: |
-          echo "WEST=-103.75"  >> $GITHUB_ENV
-          echo "SOUTH=20.50"   >> $GITHUB_ENV
-          echo "EAST=-103.45"  >> $GITHUB_ENV
-          echo "NORTH=20.80"   >> $GITHUB_ENV
-          echo "MIN_ZOOM=10"   >> $GITHUB_ENV   # 10 da contexto; puedes bajar a 12 si prefieres
-          echo "MAX_ZOOM=14"   >> $GITHUB_ENV   # sube a 15 si necesitas más detalle (archivo más grande)
+          echo "WEST=-104.00"  >> $GITHUB_ENV
+          echo "SOUTH=20.30"   >> $GITHUB_ENV
+          echo "EAST=-103.20"  >> $GITHUB_ENV
+          echo "NORTH=20.95"   >> $GITHUB_ENV
+          echo "MIN_ZOOM=10"   >> $GITHUB_ENV
+          echo "MAX_ZOOM=14"   >> $GITHUB_ENV   # <-- súbelo/bájalo aquí
+
 
       - name: Build PMTiles with Planetiler (Docker)
         env:
