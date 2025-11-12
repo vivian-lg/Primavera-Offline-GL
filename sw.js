@@ -1,5 +1,5 @@
 // sw.js — PMTiles offline con soporte de Range/HEAD correcto
-const CACHE_NAME = 'primavera-cache-v21';
+const CACHE_NAME = 'primavera-cache-v22';
 const PRECACHE = [
   './',
   './index.html',
