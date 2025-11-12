@@ -1,23 +1,22 @@
-// Evita doble registro del protocolo PMTiles
+// =================== PMTiles: evita doble registro ===================
 if (!window.__pmtilesProtocolAdded) {
   window.__pmtilesProtocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", window.__pmtilesProtocol.tile);
   window.__pmtilesProtocolAdded = true;
 }
 
-// UI refs
+// =================== UI refs ===================
 const statusEl = document.getElementById('status');
 const plusEl   = document.getElementById('pluscode');
 const guideEl  = document.getElementById('guide');
 function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
 
-// Crea el mapa usando tu archivo local PMTiles (vector)
+// =================== Mapa base (vector desde PMTiles) ===================
 const map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
-    // OJO: Esto sirve fuentes de texto desde internet. Si quieres 100% offline,
-    // luego te enseño a empaquetar glyphs locales. Por ahora déjalo así o elimina capas de texto.
+    // Para ver etiquetas online. Para 100% offline, luego empaquetamos glyphs locales.
     glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
     sources: {
       primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
@@ -55,9 +54,7 @@ const map = new maplibregl.Map({
           "line-color": "#fff",
           "line-width": [
             "interpolate", ["linear"], ["zoom"],
-            10, 0.5,
-            14, 2.5,
-            16, 5
+            10, 0.5, 14, 2.5, 16, 5
           ]
         }
       },
@@ -67,9 +64,7 @@ const map = new maplibregl.Map({
           "line-color": "#666",
           "line-width": [
             "interpolate", ["linear"], ["zoom"],
-            10, 0.3,
-            14, 1.5,
-            16, 3
+            10, 0.3, 14, 1.5, 16, 3
           ]
         }
       },
@@ -79,75 +74,67 @@ const map = new maplibregl.Map({
         type: "fill", source: "primavera", "source-layer": "building",
         paint: {
           "fill-color": "#d7d3c8",
-          "fill-opacity": [
-            "interpolate", ["linear"], ["zoom"],
-            13, 0.0,
-            15, 0.6
-          ]
+          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.0, 15, 0.6]
         }
       }
-
-      // (Opcional) Etiquetas:
-      // Agrega luego capas 'symbol' usando 'place' o 'poi' si mantienes glyphs online.
-      // Ejemplo:
-      // { id: "place-label",
-      //   type: "symbol", source: "primavera", "source-layer": "place",
-      //   layout: { "text-field": ["get", "name"], "text-size": 12 },
-      //   paint: { "text-color": "#334", "text-halo-color": "#eef3f6", "text-halo-width": 1 }
-      // }
     ]
   },
   center: [-103.60, 20.65],
   zoom: 12
 });
 
+// Etiquetas (opcional; requieren glyphs online)
+map.on('load', () => {
+  map.addLayer({
+    id: 'place-label',
+    type: 'symbol',
+    source: 'primavera',
+    'source-layer': 'place',
+    layout: {
+      'text-field': ['coalesce', ['get','name'], ['get','name:es'], ['get','name:en']],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 10, 10, 14, 14]
+    },
+    paint: { 'text-color': '#2f3440', 'text-halo-color': '#eef3f6', 'text-halo-width': 1 }
+  });
 
+  map.addLayer({
+    id: 'water-name',
+    type: 'symbol',
+    source: 'primavera',
+    'source-layer': 'water_name',
+    layout: { 'text-field': ['get','name'], 'text-size': 12, 'symbol-placement': 'line' },
+    paint: { 'text-color': '#557a9e', 'text-halo-color': '#eef3f6', 'text-halo-width': 1 }
+  });
 
+  map.addLayer({
+    id: 'road-name',
+    type: 'symbol',
+    source: 'primavera',
+    'source-layer': 'transportation_name',
+    layout: { 'text-field': ['get','name'], 'text-size': 11, 'symbol-placement': 'line' },
+    paint: { 'text-color': '#555', 'text-halo-color': '#fff', 'text-halo-width': 0.5 }
+  });
+});
 
-
-// ====== CARGA DATOS (de momento estarán vacíos; los crearás en pasos siguientes)
+// =================== Utilidades ===================
 async function safeFetchJSON(url){
   try { const r = await fetch(url); if(!r.ok) return null; return await r.json(); }
   catch { return null; }
 }
 
-async function addRoutes(){
-  const routes = await safeFetchJSON('./data/routes.geojson');
-  if(!routes){ setStatus('Sin routes.geojson (aún).'); return; }
-  map.addSource('routes', { type:'geojson', data: routes });
-  map.addLayer({
-    id:'routes-line',
-    type:'line',
-    source:'routes',
-    paint:{
-      'line-width': 3,
-      'line-color': ['case',
-        ['==',['get','difficulty'],'easy'],   '#4caf50',
-        ['==',['get','difficulty'],'medium'], '#ff9800',
-        ['==',['get','difficulty'],'hard'],   '#e53935',
-        /* default */ '#999'
-      ]
-    }
-  });
-}
-
+// =================== POIs: círculos (offline-friendly) ===================
 async function addPOIs(){
   const pois = await safeFetchJSON('./data/pois.geojson');
   if(!pois) return;
 
   map.addSource('pois', { type:'geojson', data: pois });
 
-  // círculos visibles
   map.addLayer({
     id:'pois-circles',
     type:'circle',
     source:'pois',
     paint:{
-      'circle-radius': [
-        'interpolate', ['linear'], ['zoom'],
-        10, 3,
-        14, 6
-      ],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3, 14, 6],
       'circle-color': [
         'match', ['get','type'],
         'signal', '#1e88e5',
@@ -160,111 +147,203 @@ async function addPOIs(){
     }
   });
 
-  // (opcional) etiquetas si mantienes glyphs online
-  // map.addLayer({
-  //   id:'pois-labels',
-  //   type:'symbol',
-  //   source:'pois',
-  //   layout:{ 'text-field': ['get','name'], 'text-size': 11, 'text-offset':[0,1.2] },
-  //   paint:{ 'text-color':'#334', 'text-halo-color':'#eef3f6', 'text-halo-width':1 }
-  // });
+  // (Opcional) etiquetas si mantienes glyphs online:
+  // map.addLayer({ ... "type":"symbol" ... })
 }
 
+// =================== Rutas: selección individual + colores fijos ===================
+// 1) Lista de archivos EXACTOS en /routes_geojson
+const ROUTE_FILES = [
+  "bosque-nutella (1).geojson",
+  "Ruta la catarina  (1).geojson",
+  "huevona (1).geojson",
+  "by-pass-516314 (1).geojson",
+  "vaca-muerta-rivers-combined (1).geojson",
+  "torre-03 (1).geojson",
+  "espinazo (1).geojson",
+  "pinitos-angel (1).geojson",
+  "1-2-mosca (1).geojson",
+  "relax (1).geojson",
+  "torre-01 (1).geojson",
+  "extension-espinazo (1).geojson",
+  "toboganes-110689 (1).geojson",
+  "mago-de-oz (1).geojson",
+  "arenosas (1).geojson"
+];
 
-map.on('load', () => {
-  // Etiquetas de lugares (pueblos/colonias)
-  map.addLayer({
-    id: 'place-label',
-    type: 'symbol',
-    source: 'primavera',
-    'source-layer': 'place',
-    layout: {
-      'text-field': ['coalesce', ['get','name'], ['get','name:es'], ['get','name:en']],
-      'text-size': [
-        'interpolate', ['linear'], ['zoom'],
-        10, 10,
-        14, 14
-      ]
-    },
-    paint: {
-      'text-color': '#2f3440',
-      'text-halo-color': '#eef3f6',
-      'text-halo-width': 1
+// 2) Colores fijos por archivo
+const ROUTE_COLORS = {
+  "bosque-nutella (1).geojson": "#e41a1c",
+  "Ruta la catarina  (1).geojson": "#377eb8",
+  "huevona (1).geojson": "#4daf4a",
+  "by-pass-516314 (1).geojson": "#984ea3",
+  "vaca-muerta-rivers-combined (1).geojson": "#ff7f00",
+  "torre-03 (1).geojson": "#a65628",
+  "espinazo (1).geojson": "#f781bf",
+  "pinitos-angel (1).geojson": "#999999",
+  "1-2-mosca (1).geojson": "#66c2a5",
+  "relax (1).geojson": "#fc8d62",
+  "torre-01 (1).geojson": "#1b9e77",
+  "extension-espinazo (1).geojson": "#d95f02",
+  "toboganes-110689 (1).geojson": "#7570b3",
+  "mago-de-oz (1).geojson": "#e7298a",
+  "arenosas (1).geojson": "#66a61e"
+};
+
+// 3) Paleta de respaldo + hash estable (para archivos nuevos)
+const PALETTE = ["#377eb8","#e41a1c","#4daf4a","#984ea3","#ff7f00","#a65628",
+                 "#f781bf","#999999","#66c2a5","#fc8d62","#1b9e77","#d95f02",
+                 "#7570b3","#e7298a","#66a61e"];
+function stableColorFor(name){
+  if (ROUTE_COLORS[name]) return ROUTE_COLORS[name];
+  let h = 0;
+  for (let i=0; i<name.length; i++){ h=((h<<5)-h)+name.charCodeAt(i); h|=0; }
+  return PALETTE[Math.abs(h)%PALETTE.length];
+}
+
+// 4) Estructuras para administrar rutas
+const ROUTE_DATA = {};   // file -> GeoJSON
+const ROUTE_IDS  = {};   // file -> {srcId, layerId}
+
+// 5) BBox util (LineString/MultiLineString)
+function bboxOfGeoJSON(geo){
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for (const f of geo.features || []){
+    const g = f.geometry; if(!g) continue;
+    const groups = g.type==='LineString' ? [g.coordinates]
+                 : g.type==='MultiLineString' ? g.coordinates
+                 : [];
+    for(const line of groups){
+      for(const [x,y] of line){
+        if(x<minX)minX=x; if(y<minY)minY=y;
+        if(x>maxX)maxX=x; if(y>maxY)maxY=y;
+      }
     }
-  });
-
-  // Nombres de cuerpos de agua (opcional)
-  map.addLayer({
-    id: 'water-name',
-    type: 'symbol',
-    source: 'primavera',
-    'source-layer': 'water_name',
-    layout: {
-      'text-field': ['get','name'],
-      'text-size': 12,
-      'symbol-placement': 'line'
-    },
-    paint: {
-      'text-color': '#557a9e',
-      'text-halo-color': '#eef3f6',
-      'text-halo-width': 1
-    }
-  });
-
-  // Nombres de carreteras/caminos (opcional)
-  map.addLayer({
-    id: 'road-name',
-    type: 'symbol',
-    source: 'primavera',
-    'source-layer': 'transportation_name',
-    layout: {
-      'text-field': ['get','name'],
-      'text-size': 11,
-      'symbol-placement': 'line'
-    },
-    paint: {
-      'text-color': '#555',
-      'text-halo-color': '#fff',
-      'text-halo-width': 0.5
-    }
-  });
-});
-
-
-// ====== Filtros (funcionarán cuando existan las capas)
-function applyFilters(){
-  const fe = document.getElementById('f-easy')?.checked;
-  const fm = document.getElementById('f-medium')?.checked;
-  const fh = document.getElementById('f-hard')?.checked;
-
-  if (!map.getLayer('routes-line')) return;
-
-  const selected = [];
-  if (fe) selected.push('easy');
-  if (fm) selected.push('medium');
-  if (fh) selected.push('hard');
-
-  // Si no hay nada seleccionado, oculta todo
-  if (selected.length === 0) {
-    map.setFilter('routes-line', ['literal', false]);
-    return;
   }
-
-  // Filtro correcto: booleano (true si el valor está en la lista)
-  map.setFilter('routes-line', [
-    'match',
-    ['get','difficulty'],
-    selected, true,
-    false
-  ]);
+  if (!isFinite(minX)) return null;
+  return [[minX,minY],[maxX,maxY]];
 }
 
-['f-easy','f-medium','f-hard'].forEach(id=>{
-  document.getElementById(id)?.addEventListener('change', applyFilters);
-});
-map.on('idle', applyFilters);
+// 6) Cargar una ruta -> source+layer + fila UI
+async function addOneRoute(file){
+  try{
+    const res = await fetch(`./routes_geojson/${file}`);
+    if(!res.ok){ setStatus(`No pude cargar ${file}`); return; }
+    const geo = await res.json();
+    ROUTE_DATA[file] = geo;
 
-// ====== GPS + Plus Code + Seguirme
+    // nombre amigable (si viene en properties.name)
+    let displayName = file.replace(/\.geojson$/i,'');
+    try{
+      const f = geo.features?.find(ft => ft.properties?.name);
+      if (f && f.properties.name) displayName = f.properties.name;
+    }catch{}
+
+    const color = stableColorFor(file);
+    const srcId   = 'r_src_'   + file.replace(/[^\w]/g,'_');
+    const layerId = 'r_layer_' + file.replace(/[^\w]/g,'_');
+
+    map.addSource(srcId, { type:'geojson', data: geo });
+    map.addLayer({
+      id: layerId,
+      type: 'line',
+      source: srcId,
+      paint: { 'line-color': color, 'line-width': 3 }
+    });
+
+    ROUTE_IDS[file] = {srcId, layerId};
+
+    // UI
+    const list = document.getElementById('routes-list');
+    const wrap = document.createElement('div');
+    wrap.className = 'route-item';
+
+    const swatch = document.createElement('div');
+    swatch.className = 'route-color';
+    swatch.style.background = color;
+
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = true;
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'route-name';
+    nameEl.textContent = displayName;
+
+    const btnZoom = document.createElement('button');
+    btnZoom.className = 'route-zoom';
+    btnZoom.title = 'Zoom a esta ruta';
+    btnZoom.textContent = '🔍';
+
+    wrap.append(swatch, chk, nameEl, btnZoom);
+    list.appendChild(wrap);
+
+    // Mostrar/ocultar
+    chk.addEventListener('change', ()=>{
+      if (map.getLayer(layerId)){
+        map.setLayoutProperty(layerId, 'visibility', chk.checked ? 'visible':'none');
+      }
+    });
+
+    // Zoom a bbox de esa ruta
+    btnZoom.addEventListener('click', ()=>{
+      const b = bboxOfGeoJSON(geo);
+      if (b) map.fitBounds(b, {padding: 40});
+    });
+
+  }catch(e){
+    setStatus(`Error cargando ${file}`);
+  }
+}
+
+// 7) Cargar todas
+function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
+
+// 8) Botones globales
+document.getElementById('btn-show-all')?.addEventListener('click', ()=>{
+  for(const f in ROUTE_IDS){
+    const {layerId} = ROUTE_IDS[f];
+    if (map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility','visible');
+  }
+  document.querySelectorAll('#routes-list input[type="checkbox"]').forEach(c=> c.checked = true);
+});
+
+document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
+  for(const f in ROUTE_IDS){
+    const {layerId} = ROUTE_IDS[f];
+    if (map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility','none');
+  }
+  document.querySelectorAll('#routes-list input[type="checkbox"]').forEach(c=> c.checked = false);
+});
+
+document.getElementById('btn-zoom-all')?.addEventListener('click', ()=>{
+  // BBox de todas las rutas visibles
+  let union = null;
+  for (const f in ROUTE_DATA){
+    const {layerId} = ROUTE_IDS[f] || {};
+    if (!layerId || map.getLayoutProperty(layerId,'visibility')==='none') continue;
+    const b = bboxOfGeoJSON(ROUTE_DATA[f]);
+    if (!b) continue;
+    if (!union) union = b;
+    else {
+      union = [
+        [Math.min(union[0][0], b[0][0]), Math.min(union[0][1], b[0][1])],
+        [Math.max(union[1][0], b[1][0]), Math.max(union[1][1], b[1][1])]
+      ];
+    }
+  }
+  if (union) map.fitBounds(union, {padding: 40});
+  else setStatus('No hay rutas visibles para ajustar el zoom');
+});
+
+// 9) Carga al inicio
+map.on('load', async ()=>{
+  loadAllRoutes();
+  await addPOIs();
+  setStatus('Mapa cargado');
+});
+
+// =================== GPS + Plus Code + Seguirme ===================
 let watchId=null, lastPos=null, followMe=false, hadFirstFix=false, userMarker=null;
 function updateFollowUI(){
   const b = document.getElementById('btn-follow');
@@ -294,8 +373,8 @@ function startLocate(){
     setStatus('No pude obtener ubicación (habilita GPS y permisos)');
   }, {enableHighAccuracy:true, maximumAge:3000, timeout:15000});
 }
-document.getElementById('btn-locate').addEventListener('click', startLocate);
-document.getElementById('btn-follow').addEventListener('click', ()=>{
+document.getElementById('btn-locate')?.addEventListener('click', startLocate);
+document.getElementById('btn-follow')?.addEventListener('click', ()=>{
   followMe = !followMe; updateFollowUI();
   if (followMe && lastPos){ map.setCenter([lastPos.coords.longitude, lastPos.coords.latitude]); }
 });
@@ -303,35 +382,11 @@ map.on('dragstart', ()=>{ followMe=false; updateFollowUI(); });
 map.on('zoomstart', ()=>{ followMe=false; updateFollowUI(); });
 updateFollowUI();
 
-document.getElementById('btn-copy').addEventListener('click', ()=>{
-  navigator.clipboard?.writeText(plusEl.textContent || '');
+document.getElementById('btn-copy')?.addEventListener('click', ()=>{
+  navigator.clipboard?.writeText(plusEl?.textContent || '');
   setStatus('Plus Code copiado');
 });
 
-// Zoom/mostrar/ocultar (cuando existan capas)
-document.getElementById('btn-zoom-all').addEventListener('click', ()=>{
-  const src = map.getSource('routes'); if(!src) return;
-  const data = src._data || src._options?.data;
-  if (!data?.features?.length) return;
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  for (const f of data.features){
-    const g=f.geometry;
-    const lines = g.type==='LineString' ? [g.coordinates] : g.type==='MultiLineString' ? g.coordinates : [];
-    for (const line of lines){
-      for (const [x,y] of line){ if(x<minX)minX=x; if(y<minY)minY=y; if(x>maxX)maxX=x; if(y>maxY)maxY=y; }
-    }
-  }
-  if (isFinite(minX)) map.fitBounds([[minX,minY],[maxX,maxY]], {padding:40});
-});
-document.getElementById('btn-hide-all').addEventListener('click', ()=>{
-  if (map.getLayer('routes-line')) map.setLayoutProperty('routes-line','visibility','none');
-  if (map.getLayer('pois')) map.setLayoutProperty('pois','visibility','none');
-});
-document.getElementById('btn-show-all').addEventListener('click', ()=>{
-  if (map.getLayer('routes-line')) map.setLayoutProperty('routes-line','visibility','visible');
-  if (map.getLayer('pois')) map.setLayoutProperty('pois','visibility','visible');
-});
-
-// Rumbo/distancia (lo activaremos al elegir punto, más adelante)
+// =================== Rumbo/guía (placeholder) ===================
 function setGuideText(txt){ if(guideEl) guideEl.textContent = txt; }
 setGuideText('—');
