@@ -1,0 +1,37 @@
+name: Build PMTiles (Bosque La Primavera)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set bounds env
+        run: |
+          echo "WEST=-103.75" >> $GITHUB_ENV
+          echo "SOUTH=20.50"  >> $GITHUB_ENV
+          echo "EAST=-103.45" >> $GITHUB_ENV
+          echo "NORTH=20.80"  >> $GITHUB_ENV
+          echo "MIN_ZOOM=0"   >> $GITHUB_ENV
+          echo "MAX_ZOOM=14"  >> $GITHUB_ENV
+
+      # Usamos Planetiler en Docker (no instalas nada)
+      - name: Build PMTiles with Planetiler
+        run: |
+          docker run --rm -v "$PWD":/data ghcr.io/onthegomap/planetiler:latest \
+            --bounds=$WEST,$SOUTH,$EAST,$NORTH \
+            --output=/data/primavera.pmtiles \
+            --download \
+            --max-zoom=$MAX_ZOOM \
+            --min-zoom=$MIN_ZOOM
+
+      - name: Upload PMTiles artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: primavera.pmtiles
+          path: primavera.pmtiles
+          if-no-files-found: error
