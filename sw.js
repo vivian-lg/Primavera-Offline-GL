@@ -1,14 +1,16 @@
-const CACHE_NAME = 'primavera-cache-v4';
+const CACHE_NAME = 'primavera-cache-v5';
 const PRECACHE = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
+  './libs/openlocationcode.js',   // <-- NUEVO
   './data/routes.geojson',
   './data/pois.geojson',
-  './primavera.pmtiles'   // <- importante
+  './primavera.pmtiles'           // <-- asegúrate que esté aquí
 ];
+
 
 self.addEventListener('install', e=>{
   e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting()));
