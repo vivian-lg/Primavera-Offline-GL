@@ -8,40 +8,41 @@ function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
 
 // === Mapa: por ahora usa tiles online de OSM para que veas algo YA.
 // Luego cambiaremos a PMTiles local (offline total).
+// Protocolo PMTiles (una sola vez)
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol("pmtiles", protocol.tile);
+
+// Mapa con fuente vectorial desde tu pmtiles local
 const map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
-
-    // ⚠️ Esto sirve etiquetas desde internet. Si quieres 100% offline, luego te paso cómo empacar glyphs locales.
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-
+    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf", // opcional (requiere internet)
     sources: {
-      // Tu fuente base: vector desde PMTiles local
       primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
     },
     layers: [
-      { id: "bg", type: "background", paint: { "background-color": "#eef3f6" } },
+      { id:"bg", type:"background", paint:{ "background-color":"#eef3f6" } },
 
-      // Agua
-      { id: "water",
-        type: "fill", source: "primavera", "source-layer": "water",
-        paint: { "fill-color": "#b5d0e6" } },
+      // Estas capas asumen nombres típicos OpenMapTiles.
+      // Si alguna no existe en tu archivo, la quitamos en el paso 3.
+      { id:"water",
+        type:"fill", source:"primavera", "source-layer":"water",
+        paint:{ "fill-color":"#b5d0e6" } },
 
-      // Vegetación / landcover (si existe)
-      { id: "landcover",
-        type: "fill", source: "primavera", "source-layer": "landcover",
-        paint: { "fill-color": "#d9ebc6", "fill-opacity": 0.6 } },
+      { id:"landcover",
+        type:"fill", source:"primavera", "source-layer":"landcover",
+        paint:{ "fill-color":"#d9ebc6", "fill-opacity":0.6 } },
 
-      // Caminos
-      { id: "roads",
-        type: "line", source: "primavera", "source-layer": "transportation",
-        paint: { "line-color": "#888", "line-width": 1.2 } }
+      { id:"roads",
+        type:"line", source:"primavera", "source-layer":"transportation",
+        paint:{ "line-color":"#888", "line-width":1.2 } }
     ]
   },
   center: [-103.60, 20.65],
   zoom: 12
 });
+
 
 
 
