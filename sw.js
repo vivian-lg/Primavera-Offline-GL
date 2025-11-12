@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primavera-cache-v13';
+const CACHE_NAME = 'primavera-cache-v14';
 const PRECACHE = [
   './',
   './index.html',
@@ -6,9 +6,24 @@ const PRECACHE = [
   './app.js',
   './manifest.json',
   './libs/openlocationcode.js',
-  './data/routes.geojson',
   './data/pois.geojson',
   './primavera.pmtiles' // precache completo para uso offline
+  './routes_geojson/1-2-mosca.geojson',
+  './routes_geojson/arenosas.geojson',
+  './routes_geojson/brujas.geojson'
+  './routes_geojson/bosque-nutella.geojson',
+  './routes_geojson/espinazo.geojson',
+  './routes_geojson/by-pass-516314.geojson'
+  './routes_geojson/extension-espinazo.geojson',
+  './routes_geojson/huevona.geojson',
+  './routes_geojson/mago-de-oz.geojson',
+  './routes_geojson/pinitos-angel.geojson'
+  './routes_geojson/relax.geojson',
+  './routes_geojson/Ruta la catarina.geojson',
+  './routes_geojson/toboganes-110689.geojson'
+  './routes_geojson/torre-01.geojson',
+  './routes_geojson/torre-03.geojson',
+  './routes_geojson/vaca-muerta-rivers-combined.geojson'
 ];
 
 self.addEventListener('install', e=>{
