@@ -1,19 +1,81 @@
+/* Base compacta */
 :root{
-  --bg:#0f1115; --panel:#151922; --text:#e9edf1; --muted:#92a0b3;
-  --btn:#1e2532; --btn-hover:#2a3344; --border:#222a38;
+  --bg:#0d1117;
+  --panel:#161b22;
+  --text:#e6edf3;
+  --muted:#8b949e;
+  --accent:#4cb3ff;
 }
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial;}
-header, footer{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-h1{margin:0;font-size:1.1rem}
-.small-subtitle{opacity:.7}
-#map{height:65vh;border-bottom:1px solid var(--border);background:#0a0c10}
-#panel{padding:12px;display:grid;gap:10px;max-width:1100px;margin:0 auto}
-button{background:var(--btn);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 12px;cursor:pointer;transition:.15s}
-button:hover{background:var(--btn-hover)}
-details summary{cursor:pointer;color:var(--muted)}
-small,#status{color:var(--muted)}
-.route-item{ display:flex; align-items:center; gap:8px; margin:6px 0; }
-.route-color{ width:14px; height:14px; border-radius:3px; border:1px solid #0001; }
+
+html,body{ height:100%; margin:0; }
+body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      color:var(--text); background:var(--bg); }
+
+/* Header compacto */
+header{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; background:var(--panel); border-bottom:1px solid #21262d;
+}
+header h1{ font-size:16px; margin:0; font-weight:600; }
+.small-subtitle{ font-size:12px; color:var(--muted); }
+
+/* Botones compactos */
+button{
+  font-size:12px;
+  padding:6px 10px;
+  line-height:1;
+  border:1px solid #30363d;
+  background:#1f242d;
+  color:var(--text);
+  border-radius:8px;
+  cursor:pointer;
+}
+button:hover{ background:#222a33; }
+button:active{ transform:translateY(0.5px); }
+button.small{ font-size:11px; padding:4px 8px; border-radius:7px; }
+
+/* Contenedor principal */
+#map{ height: 58vh; }      /* menos alto para que quepa el panel */
+#panel{
+  padding:10px;
+  background:var(--panel);
+  border-top:1px solid #21262d;
+}
+
+/* Grupo de acciones del panel, más chico */
+#panel .actions{
+  display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;
+}
+#panel .actions button{ font-size:11px; padding:4px 8px; }
+
+/* Texto de estado */
+#status, #pluscode, #nearest{ color:var(--muted); }
+
+/* Lista de rutas compacta */
+#routes-list{ max-height: 26vh; overflow:auto; margin-top:6px; }
+.route-item{
+  display:flex; align-items:center; gap:8px;
+  padding:4px 0; font-size:13px;
+  border-bottom:1px dashed #21262d;
+}
+.route-item:last-child{ border-bottom:none; }
+.route-color{ width:12px; height:12px; border-radius:3px; border:1px solid #0002; }
 .route-name{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.route-zoom{ border:none; background:#0000; cursor:pointer; font-size:16px; }
+.route-zoom{ border:none; background:transparent; cursor:pointer; font-size:14px; }
+
+/* Details/summary compactos */
+details>summary{ cursor:pointer; list-style:none; user-select:none; }
+details>summary::-webkit-details-marker{ display:none; }
+details>summary{ font-size:13px; color:var(--text); padding:4px 0; }
+
+/* En móviles, aún más compacto */
+@media (max-width: 480px){
+  header{ padding:6px 8px; }
+  header h1{ font-size:15px; }
+  #map{ height: 55vh; }
+  button{ font-size:11px; padding:5px 8px; border-radius:7px; }
+  .route-item{ font-size:12px; gap:6px; }
+  .route-color{ width:10px; height:10px; }
+}
+
 
