@@ -1,5 +1,10 @@
-const protocol = new pmtiles.Protocol();
-maplibregl.addProtocol("pmtiles", protocol.tile);
+// Evita doble registro del protocolo PMTiles
+if (!window.__pmtilesProtocolAdded) {
+  window.__pmtilesProtocol = new pmtiles.Protocol();
+  maplibregl.addProtocol("pmtiles", window.__pmtilesProtocol.tile);
+  window.__pmtilesProtocolAdded = true;
+}
+
 // UI refs
 const statusEl = document.getElementById('status');
 const plusEl   = document.getElementById('pluscode');
