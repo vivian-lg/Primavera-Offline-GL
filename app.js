@@ -154,46 +154,48 @@ async function addPOIs(){
 // =================== Rutas: selección individual + colores fijos ===================
 // 1) Lista de archivos EXACTOS en /routes_geojson
 const ROUTE_FILES = [
-  "bosque-nutella (1).geojson",
-  "Ruta la catarina  (1).geojson",
-  "huevona (1).geojson",
-  "by-pass-516314 (1).geojson",
-  "vaca-muerta-rivers-combined (1).geojson",
-  "torre-03 (1).geojson",
-  "espinazo (1).geojson",
-  "pinitos-angel (1).geojson",
-  "1-2-mosca (1).geojson",
-  "relax (1).geojson",
-  "torre-01 (1).geojson",
-  "extension-espinazo (1).geojson",
-  "toboganes-110689 (1).geojson",
-  "mago-de-oz (1).geojson",
-  "arenosas (1).geojson"
+  "bosque-nutella.geojson",
+  "brujas.geojson",
+  "Ruta la catarina.geojson",
+  "huevona.geojson",
+  "by-pass-516314.geojson",
+  "vaca-muerta-rivers-combined.geojson",
+  "torre-03.geojson",
+  "espinazo.geojson",
+  "pinitos-angel.geojson",
+  "1-2-mosca.geojson",
+  "relax.geojson",
+  "torre-01.geojson",
+  "extension-espinazo.geojson",
+  "toboganes-110689.geojson",
+  "mago-de-oz.geojson",
+  "arenosas.geojson"
 ];
 
 // 2) Colores fijos por archivo
 const ROUTE_COLORS = {
-  "bosque-nutella (1).geojson": "#e41a1c",
-  "Ruta la catarina  (1).geojson": "#377eb8",
-  "huevona (1).geojson": "#4daf4a",
-  "by-pass-516314 (1).geojson": "#984ea3",
-  "vaca-muerta-rivers-combined (1).geojson": "#ff7f00",
-  "torre-03 (1).geojson": "#a65628",
-  "espinazo (1).geojson": "#f781bf",
-  "pinitos-angel (1).geojson": "#999999",
-  "1-2-mosca (1).geojson": "#66c2a5",
-  "relax (1).geojson": "#fc8d62",
-  "torre-01 (1).geojson": "#1b9e77",
-  "extension-espinazo (1).geojson": "#d95f02",
-  "toboganes-110689 (1).geojson": "#7570b3",
-  "mago-de-oz (1).geojson": "#e7298a",
-  "arenosas (1).geojson": "#66a61e"
+  "bosque-nutella.geojson": "#e41a1c",
+  "brujas.geojson": "#17becf",
+  "Ruta la catarina.geojson": "#377eb8",
+  "huevona.geojson": "#4daf4a",
+  "by-pass-516314.geojson": "#984ea3",
+  "vaca-muerta-rivers-combined.geojson": "#ff7f00",
+  "torre-03.geojson": "#a65628",
+  "espinazo.geojson": "#f781bf",
+  "pinitos-angel.geojson": "#999999",
+  "1-2-mosca.geojson": "#66c2a5",
+  "relax.geojson": "#fc8d62",
+  "torre-01.geojson": "#1b9e77",
+  "extension-espinazo.geojson": "#d95f02",
+  "toboganes-110689.geojson": "#7570b3",
+  "mago-de-oz.geojson": "#e7298a",
+  "arenosas.geojson": "#66a61e"
 };
 
 // 3) Paleta de respaldo + hash estable (para archivos nuevos)
 const PALETTE = ["#377eb8","#e41a1c","#4daf4a","#984ea3","#ff7f00","#a65628",
                  "#f781bf","#999999","#66c2a5","#fc8d62","#1b9e77","#d95f02",
-                 "#7570b3","#e7298a","#66a61e"];
+                 "#7570b3","#e7298a","#66a61e","#17becf"];
 function stableColorFor(name){
   if (ROUTE_COLORS[name]) return ROUTE_COLORS[name];
   let h = 0;
