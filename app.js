@@ -6,42 +6,96 @@ const plusEl   = document.getElementById('pluscode');
 const guideEl  = document.getElementById('guide');
 function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
 
-// === Mapa: por ahora usa tiles online de OSM para que veas algo YA.
-// Luego cambiaremos a PMTiles local (offline total).
-// Protocolo PMTiles (una sola vez)
-const protocol = new pmtiles.Protocol();
-maplibregl.addProtocol("pmtiles", protocol.tile);
-
-// Mapa con fuente vectorial desde tu pmtiles local
+// Crea el mapa usando tu archivo local PMTiles (vector)
 const map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf", // opcional (requiere internet)
+    // OJO: Esto sirve fuentes de texto desde internet. Si quieres 100% offline,
+    // luego te enseño a empaquetar glyphs locales. Por ahora déjalo así o elimina capas de texto.
+    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
     sources: {
       primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
     },
     layers: [
-      { id:"bg", type:"background", paint:{ "background-color":"#eef3f6" } },
+      // Fondo
+      { id: "bg", type: "background", paint: { "background-color": "#eef3f6" } },
 
-      // Estas capas asumen nombres típicos OpenMapTiles.
-      // Si alguna no existe en tu archivo, la quitamos en el paso 3.
-      { id:"water",
-        type:"fill", source:"primavera", "source-layer":"water",
-        paint:{ "fill-color":"#b5d0e6" } },
+      // Vegetación / usos de suelo
+      { id: "landcover",
+        type: "fill", source: "primavera", "source-layer": "landcover",
+        paint: { "fill-color": "#d9ebc6", "fill-opacity": 0.6 } },
 
-      { id:"landcover",
-        type:"fill", source:"primavera", "source-layer":"landcover",
-        paint:{ "fill-color":"#d9ebc6", "fill-opacity":0.6 } },
+      { id: "landuse",
+        type: "fill", source: "primavera", "source-layer": "landuse",
+        paint: { "fill-color": "#e6edd9", "fill-opacity": 0.5 } },
 
-      { id:"roads",
-        type:"line", source:"primavera", "source-layer":"transportation",
-        paint:{ "line-color":"#888", "line-width":1.2 } }
+      { id: "park",
+        type: "fill", source: "primavera", "source-layer": "park",
+        paint: { "fill-color": "#cfe9b5", "fill-opacity": 0.6 } },
+
+      // Agua
+      { id: "water",
+        type: "fill", source: "primavera", "source-layer": "water",
+        paint: { "fill-color": "#b5d0e6" } },
+
+      { id: "waterway",
+        type: "line", source: "primavera", "source-layer": "waterway",
+        paint: { "line-color": "#88b5d8", "line-width": 1 } },
+
+      // Caminos
+      { id: "roads-casing",
+        type: "line", source: "primavera", "source-layer": "transportation",
+        paint: {
+          "line-color": "#fff",
+          "line-width": [
+            "interpolate", ["linear"], ["zoom"],
+            10, 0.5,
+            14, 2.5,
+            16, 5
+          ]
+        }
+      },
+      { id: "roads",
+        type: "line", source: "primavera", "source-layer": "transportation",
+        paint: {
+          "line-color": "#666",
+          "line-width": [
+            "interpolate", ["linear"], ["zoom"],
+            10, 0.3,
+            14, 1.5,
+            16, 3
+          ]
+        }
+      },
+
+      // Edificios
+      { id: "building",
+        type: "fill", source: "primavera", "source-layer": "building",
+        paint: {
+          "fill-color": "#d7d3c8",
+          "fill-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            13, 0.0,
+            15, 0.6
+          ]
+        }
+      }
+
+      // (Opcional) Etiquetas:
+      // Agrega luego capas 'symbol' usando 'place' o 'poi' si mantienes glyphs online.
+      // Ejemplo:
+      // { id: "place-label",
+      //   type: "symbol", source: "primavera", "source-layer": "place",
+      //   layout: { "text-field": ["get", "name"], "text-size": 12 },
+      //   paint: { "text-color": "#334", "text-halo-color": "#eef3f6", "text-halo-width": 1 }
+      // }
     ]
   },
   center: [-103.60, 20.65],
   zoom: 12
 });
+
 
 
 
