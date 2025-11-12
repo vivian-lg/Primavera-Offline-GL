@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primavera-cache-v8';
+const CACHE_NAME = 'primavera-cache-v9';
 const PRECACHE = [
   './',
   './index.html',
@@ -6,11 +6,9 @@ const PRECACHE = [
   './app.js',
   './manifest.json',
   './libs/openlocationcode.js',
-  './data/routes.geojson',
-  './data/pois.geojson',
-  './primavera.pmtiles',
-  './assets/icons/icon-192.png',   // <-- nuevo
-  './assets/icons/icon-512.png'    // <-- nuevo
+  './data/routes.geojson',   // si lo usas
+  './data/pois.geojson',     // si lo usas
+  './primavera.pmtiles'      // ← IMPORTANTE
 ];
 
 self.addEventListener('install', e=>{
