@@ -81,7 +81,6 @@ const map = new maplibregl.Map({
   },
   center: [-103.60, 20.65],
   zoom: 12
-  maxZoom: 14
 });
 
 // Etiquetas (opcional; requieren glyphs online)
