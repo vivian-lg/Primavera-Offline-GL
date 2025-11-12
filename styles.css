@@ -12,3 +12,8 @@ button{background:var(--btn);color:var(--text);border:1px solid var(--border);bo
 button:hover{background:var(--btn-hover)}
 details summary{cursor:pointer;color:var(--muted)}
 small,#status{color:var(--muted)}
+.route-item{ display:flex; align-items:center; gap:8px; margin:6px 0; }
+.route-color{ width:14px; height:14px; border-radius:3px; border:1px solid #0001; }
+.route-name{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.route-zoom{ border:none; background:#0000; cursor:pointer; font-size:16px; }
+
