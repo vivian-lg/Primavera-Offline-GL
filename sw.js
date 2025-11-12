@@ -1,17 +1,9 @@
-// ⬅️ súbela cada vez que cambies el SW
-const CACHE_NAME = 'primavera-cache-v16';
+// sw.js — cachea rutas y POIs, NO intercepta .pmtiles
+const CACHE_NAME = 'primavera-cache-v17';
 
-const PRECACHE = [
-  './',
-  './index.html',
-  './styles.css',
-  './app.js',
-  './manifest.json',
-  './libs/openlocationcode.js',
-  './data/pois.geojson',
-  './primavera.pmtiles', // precache completo para uso offline
-
-  // Rutas (asegúrate que los nombres coincidan EXACTO con tus archivos)
+// === B) USAR VARIOS ARCHIVOS EN /routes_geojson ===
+// Si usas individuales, pon la lista COMPLETA y QUITA la constante de A
+const ROUTE_FILES = [
   './routes_geojson/1-2-mosca.geojson',
   './routes_geojson/arenosas.geojson',
   './routes_geojson/brujas.geojson',
@@ -23,23 +15,41 @@ const PRECACHE = [
   './routes_geojson/mago-de-oz.geojson',
   './routes_geojson/pinitos-angel.geojson',
   './routes_geojson/relax.geojson',
-  './routes_geojson/Ruta%20la%20catarina.geojson', // si tiene espacios, usa %20
+  './routes_geojson/Ruta la catarina.geojson',
   './routes_geojson/toboganes-110689.geojson',
   './routes_geojson/torre-01.geojson',
   './routes_geojson/torre-03.geojson',
   './routes_geojson/vaca-muerta-rivers-combined.geojson'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
+const CORE = [
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './manifest.json',
+  './libs/openlocationcode.js',
+  './data/pois.geojson'
+  // OJO: NO metemos ./primavera.pmtiles aquí
+];
+
+// Construye la lista a precachear según la opción elegida
+let PRECACHE = [...CORE];
+// 👉 Deja UNA de estas dos líneas:
+
+// PRECACHE.push(ONE_ROUTES_FILE);              // (A) 1 archivo fusionado
+PRECACHE = [...CORE, ...ROUTE_FILES];     // (B) varios archivos
+
+self.addEventListener('install', (e) => {
+  e.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE))
+      .then((c) => c.addAll(PRECACHE))
       .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k))))
     )
@@ -48,91 +58,51 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
+  const url = new URL(event.request.url);
 
-  // 1) Glyphs locales -> cache-first
-  if (url.pathname.includes('/fonts/')) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
-        const cached = await cache.match(req);
-        if (cached) return cached;
-        const resp = await fetch(req);
-        cache.put(req, resp.clone());
-        return resp;
-      })
-    );
+  // ⚠️ No interceptar pmtiles ni glyphs (Range requests)
+  if (url.pathname.endsWith('.pmtiles') || url.pathname.includes('/font/')) {
     return;
   }
 
-  // 2) PMTiles con soporte de Range (obligatorio para pmtiles.js)
-  if (url.pathname.endsWith('.pmtiles')) {
-    const range = req.headers.get('Range');
+  // Cache-first para rutas y POIs
+  const isRoutes =
+    url.pathname.endsWith('/data/routes.geojson') ||
+    url.pathname.includes('/routes_geojson/');
+  const isPois = url.pathname.endsWith('/data/pois.geojson');
 
-    // Peticiones parciales
-    if (range) {
-      event.respondWith((async () => {
-        const cache = await caches.open(CACHE_NAME);
-
-        // intenta hacer match por la URL exacta de la request
-        let resp = await cache.match(req);
-        if (!resp) {
-          // si no está en cache, intenta obtenerlo y guardarlo
-          const net = await fetch(req);
-          await cache.put(req, net.clone());
-          resp = net;
-        }
-
-        const blob = await resp.blob();
-        const size = blob.size;
-
-        const m = /bytes=(\d+)-(\d+)?/.exec(range);
-        const start = m && m[1] ? Number(m[1]) : 0;
-        const end = (m && m[2]) ? Math.min(Number(m[2]), size - 1) : size - 1;
-
-        const chunk = blob.slice(start, end + 1);
-
-        return new Response(chunk, {
-          status: 206,
-          headers: {
-            'Content-Range': `bytes ${start}-${end}/${size}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': String(end - start + 1),
-            'Content-Type': 'application/octet-stream'
-          }
-        });
-      })());
-      return;
-    }
-
-    // Petición completa (sin Range) -> cache-first
+  if (isRoutes || isPois) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
-        const cached = await cache.match(req);
-        if (cached) return cached;
-        const resp = await fetch(req);
-        cache.put(req, resp.clone());
-        return resp;
-      })
-    );
-    return;
-  }
-
-  // 3) Misma-origen GET -> cache-first sencillo (útil para tus .geojson, .js, .css)
-  if (req.method === 'GET' && url.origin === self.location.origin) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
-        const cached = await cache.match(req);
-        if (cached) return cached;
+        const cached = await cache.match(event.request);
+        if (cached) return cached;             // sirve offline
         try {
-          const resp = await fetch(req);
-          cache.put(req, resp.clone());
-          return resp;
+          const net = await fetch(event.request);
+          if (net && net.ok) cache.put(event.request, net.clone());
+          return net;
         } catch {
-          // opcional: podrías devolver un fallback si es HTML
-          return cached || new Response('Offline', { status: 503 });
+          // sin red y sin caché -> 404/placeholder simple
+          return new Response('{}",',{ status: 200, headers: {'Content-Type':'application/json'} });
         }
       })
     );
+    return;
   }
+
+  // App shell (cache-first simple)
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((resp) => {
+        try {
+          if (event.request.method === 'GET' && resp.ok) {
+            const copy = resp.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(event.request, copy));
+          }
+        } catch {}
+        return resp;
+      });
+    })
+  );
 });
+
