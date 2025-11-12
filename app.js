@@ -1,3 +1,5 @@
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol("pmtiles", protocol.tile);
 // UI refs
 const statusEl = document.getElementById('status');
 const plusEl   = document.getElementById('pluscode');
@@ -15,21 +17,22 @@ const map = new maplibregl.Map({
   style: {
     version: 8,
     sources: {
-      "osm": {
+      "primavera": {
         type: "raster",
-        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+        tiles: ["pmtiles://./primavera.pmtiles/{z}/{x}/{y}"],
         tileSize: 256,
         attribution: "© OpenStreetMap"
       }
     },
     layers: [
-      { id: "bg", type: "background", paint: {"background-color": "#0f1115"} },
-      { id: "osm", type: "raster", source: "osm" }
+      { id: "bg", type: "background", paint: { "background-color": "#0f1115" } },
+      { id: "raster", type: "raster", source: "primavera" }
     ]
   },
   center: [-103.60, 20.65],
   zoom: 12
 });
+
 
 // ====== CARGA DATOS (de momento estarán vacíos; los crearás en pasos siguientes)
 async function safeFetchJSON(url){
