@@ -5,38 +5,53 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Primavera MVP</title>
 
+  <!-- MapLibre -->
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet"/>
+
+  <!-- Estilos propios -->
   <link rel="stylesheet" href="./styles.css"/>
 
-  <!-- Favicon simple para quitar 404 en consola -->
+  <!-- Favicon para evitar 404 en consola -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22>🗺️</text></svg>">
- 
-  <div id="panel">
-  <div class="panel-row">
-    <button id="btn-zoom-all">🔍 Zoom a todas</button>
-    <button id="btn-hide-all">🙈 Ocultar todas</button>
-    <button id="btn-show-all">👀 Mostrar todas</button>
-  </div>
-  <details open>
-    <summary><strong>Capas de rutas</strong></summary>
-    <div id="routes-list"></div>
-  </details>
-</div>
-
 </head>
 <body>
+  <!-- Barra superior minimal -->
   <div id="topbar">
     <button id="btn-locate">📍 Mi ubicación</button>
+    <button id="btn-follow">🧭 Seguirme: OFF</button>
     <span>Plus Code: <b id="pluscode">—</b></span>
     <span id="status" class="status">Listo</span>
   </div>
 
+  <!-- Mapa -->
   <div id="map"></div>
 
+  <!-- Panel lateral (debe ir en el body, no en el head) -->
+  <div id="panel">
+    <div class="panel-row">
+      <button id="btn-zoom-all">🔍 Zoom a todas</button>
+      <button id="btn-hide-all">Ocultar todas</button>
+      <button id="btn-show-all">Mostrar todas</button>
+    </div>
+    <details open>
+      <summary><strong>Capas de rutas</strong></summary>
+      <div id="routes-list"></div>
+    </details>
+  </div>
+
+  <!-- Librerías -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <script src="./libs/openlocationcode.js"></script>
 
+  <!-- App -->
   <script src="./app.js"></script>
+
+  <!-- (Opcional) Registrar Service Worker si ya lo tienes configurado 
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+  -->
 </body>
 </html>
-
