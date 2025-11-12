@@ -10,44 +10,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
- - name: Bounds & zoom
-  run: |
-    # OJO: orden lon,lat (west,south,east,north)
-    echo "WEST=-104.00"  >> $GITHUB_ENV
-    echo "SOUTH=20.30"   >> $GITHUB_ENV
-    echo "EAST=-103.20"  >> $GITHUB_ENV
-    echo "NORTH=20.95"   >> $GITHUB_ENV
-    echo "MIN_ZOOM=10"   >> $GITHUB_ENV
-    echo "MAX_ZOOM=14"   >> $GITHUB_ENV
-
-- name: Build PMTiles with Planetiler (no Docker, México)
-  env:
-    JAVA_TOOL_OPTIONS: "-Xms1g -Xmx6g"
-  run: |
-    curl -L -o planetiler.jar https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar
-    java -Xms1g -Xmx6g -jar planetiler.jar \
-      --osm-url=https://download.geofabrik.de/north-america/mexico-latest.osm.pbf \
-      --bounds=$WEST,$SOUTH,$EAST,$NORTH \
-      --min-zoom=$MIN_ZOOM \
-      --max-zoom=$MAX_ZOOM \
-      --output=primavera.pmtiles \
-      --force
-
-- name: List output
-  run: ls -lh
-
-- name: Validate size (>= 5 MB)
-  run: |
-    BYTES=$(stat -c%s "primavera.pmtiles" || stat -f%z "primavera.pmtiles")
-    echo "File size: $BYTES bytes"
-    if [ "$BYTES" -lt 5000000 ]; then
-      echo "PMTiles too small -> generation failed."
-      exit 1
-    fi
-
-- name: Upload artifact
-  uses: actions/upload-artifact@v4
-  with:
-    name: primavera.pmtiles
-    path: primavera.pmtiles
-    if-no-files-found: error
+      - name: Bounds & zoom
+        run: |
+          # OJO: orden lon,lat (west,south,east,north)
+          echo "WEST=-104.00"  >> $GITHUB_ENV
+          echo "SOUTH=20.30"   >> $GITHUB_ENV
+          echo "EAST=-103.20"  >> $GITHUB_ENV
+          echo "NORTH=20.95"   >> $GITHUB_ENV
+          echo "MIN_ZOOM=10"   >> $GITHUB_ENV
+          echo "MAX_ZOOM=14"   >> $GITHUB_ENV
+      
+      - name: Build PMTiles with Planetiler (no Docker, México)
+        env:
+          JAVA_TOOL_OPTIONS: "-Xms1g -Xmx6g"
+        run: |
+          curl -L -o planetiler.jar https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar
+          java -Xms1g -Xmx6g -jar planetiler.jar \
+            --osm-url=https://download.geofabrik.de/north-america/mexico-latest.osm.pbf \
+            --bounds=$WEST,$SOUTH,$EAST,$NORTH \
+            --min-zoom=$MIN_ZOOM \
+            --max-zoom=$MAX_ZOOM \
+            --output=primavera.pmtiles \
+            --force
+      
+      - name: List output
+        run: ls -lh
+      
+      - name: Validate size (>= 5 MB)
+        run: |
+          BYTES=$(stat -c%s "primavera.pmtiles" || stat -f%z "primavera.pmtiles")
+          echo "File size: $BYTES bytes"
+          if [ "$BYTES" -lt 5000000 ]; then
+            echo "PMTiles too small -> generation failed."
+            exit 1
+          fi
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: primavera.pmtiles
+          path: primavera.pmtiles
+          if-no-files-found: error
