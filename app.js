@@ -151,7 +151,65 @@ async function addPOIs(){
   });
 }
 
-map.on('load', async ()=>{ await addRoutes(); await addPOIs(); setStatus('Mapa cargado'); });
+map.on('load', () => {
+  // Etiquetas de lugares (pueblos/colonias)
+  map.addLayer({
+    id: 'place-label',
+    type: 'symbol',
+    source: 'primavera',
+    'source-layer': 'place',
+    layout: {
+      'text-field': ['coalesce', ['get','name'], ['get','name:es'], ['get','name:en']],
+      'text-size': [
+        'interpolate', ['linear'], ['zoom'],
+        10, 10,
+        14, 14
+      ]
+    },
+    paint: {
+      'text-color': '#2f3440',
+      'text-halo-color': '#eef3f6',
+      'text-halo-width': 1
+    }
+  });
+
+  // Nombres de cuerpos de agua (opcional)
+  map.addLayer({
+    id: 'water-name',
+    type: 'symbol',
+    source: 'primavera',
+    'source-layer': 'water_name',
+    layout: {
+      'text-field': ['get','name'],
+      'text-size': 12,
+      'symbol-placement': 'line'
+    },
+    paint: {
+      'text-color': '#557a9e',
+      'text-halo-color': '#eef3f6',
+      'text-halo-width': 1
+    }
+  });
+
+  // Nombres de carreteras/caminos (opcional)
+  map.addLayer({
+    id: 'road-name',
+    type: 'symbol',
+    source: 'primavera',
+    'source-layer': 'transportation_name',
+    layout: {
+      'text-field': ['get','name'],
+      'text-size': 11,
+      'symbol-placement': 'line'
+    },
+    paint: {
+      'text-color': '#555',
+      'text-halo-color': '#fff',
+      'text-halo-width': 0.5
+    }
+  });
+});
+
 
 // ====== Filtros (funcionarán cuando existan las capas)
 function applyFilters(){
