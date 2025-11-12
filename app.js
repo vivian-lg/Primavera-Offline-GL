@@ -77,13 +77,53 @@ function showUser(lat, lon) {
   } catch {}
 }
 
+// ---- Seguirme / UI ----
+let followMe = false;
+let hadFirstFix = false;
+function setGuide(text){ 
+  const el = document.getElementById('guide'); 
+  if (el) el.textContent = text || '—';
+}
+function updateFollowUI(){
+  const b = document.getElementById('btn-follow');
+  if (!b) return;
+  b.textContent = followMe ? '🧭 Seguirme: ON' : '🧭 Seguirme: OFF';
+  b.style.opacity = followMe ? '1' : '0.85';
+}
+document.getElementById('btn-follow')?.addEventListener('click', ()=>{
+  followMe = !followMe;
+  updateFollowUI();
+  if (followMe && lastPos){
+    map.setCenter([lastPos.coords.longitude, lastPos.coords.latitude]);
+  }
+});
+
+// Si el usuario mueve/zoomea el mapa, apaga seguirme (para no “pelear”)
+map.on('dragstart', ()=>{ followMe=false; updateFollowUI(); });
+map.on('zoomstart', ()=>{ followMe=false; updateFollowUI(); });
+updateFollowUI();
+
+// Guarda la última posición para el “seguir”
+let lastPos = null;
+
+// Mejora tu callback de watchPosition:
 document.getElementById('btn-locate').addEventListener('click', () => {
   if (!('geolocation' in navigator)) {
     setStatus('Este dispositivo no tiene geolocalización'); return;
   }
   navigator.geolocation.watchPosition(pos => {
+    lastPos = pos;
     const { latitude, longitude } = pos.coords;
     showUser(latitude, longitude);
+
+    // centra primera vez, luego solo si followMe está activo
+    if (!hadFirstFix) {
+      map.setCenter([longitude, latitude]);
+      hadFirstFix = true;
+    } else if (followMe) {
+      map.setCenter([longitude, latitude]);
+    }
+
     setStatus('Ubicación actualizada');
   }, err => {
     setStatus('Activa permisos de ubicación/GPS');
@@ -92,6 +132,7 @@ document.getElementById('btn-locate').addEventListener('click', () => {
 
 // === Rutas individuales ===
 const routeLayers = new Map(); // id -> {sourceId, layerId, bounds}
+const trailheads = []; // { id, name, kind: 'start'|'end', lat, lon }
 
 async function loadOneRoute(route){
   const r = await fetch(route.file);
@@ -120,25 +161,53 @@ async function loadOneRoute(route){
     });
   }
 
+  // bounds
   const b = boundsOfGeoJSON(geo);
   routeLayers.set(route.id, {sourceId, layerId, bounds: b});
+
+  // ---- trailheads (inicio/fin) a partir de la geometría ----
+  const ends = firstLastFromGeoJSON(geo);
+  if (ends?.start) {
+    trailheads.push({
+      id: route.id,
+      name: route.name,
+      kind: 'start',
+      lat: ends.start[1], lon: ends.start[0]
+    });
+  }
+  if (ends?.end) {
+    trailheads.push({
+      id: route.id,
+      name: route.name,
+      kind: 'end',
+      lat: ends.end[1], lon: ends.end[0]
+    });
+  }
 }
 
-function boundsOfGeoJSON(geo){
-  let minX= Infinity, minY= Infinity, maxX= -Infinity, maxY= -Infinity;
+// Devuelve [lon,lat] del primer y último punto
+function firstLastFromGeoJSON(geo){
+  const lines = [];
   for(const f of geo.features||[]){
     const g = f.geometry;
-    const lines = g?.type==='LineString' ? [g.coordinates] :
-                  g?.type==='MultiLineString' ? g.coordinates : [];
-    for (const line of lines){
-      for (const [x,y] of line){
-        if (x<minX) minX=x; if (y<minY) minY=y;
-        if (x>maxX) maxX=x; if (y>maxY) maxY=y;
-      }
-    }
+    if (g?.type === 'LineString') lines.push(g.coordinates);
+    else if (g?.type === 'MultiLineString') lines.push(...g.coordinates);
   }
-  if (!isFinite(minX)) return null;
-  return [[minX,minY],[maxX,maxY]];
+  if (!lines.length) return null;
+  // elige la línea más larga como principal
+  let best = lines[0], bestLen = 0;
+  for (const L of lines){
+    let acc=0;
+    for (let i=1;i<L.length;i++){
+      const [x1,y1]=L[i-1], [x2,y2]=L[i];
+      const d = Math.hypot(x2-x1, y2-y1);
+      acc += d;
+    }
+    if (acc>bestLen){ bestLen=acc; best=L; }
+  }
+  const start = best[0];
+  const end   = best[best.length-1];
+  return { start, end };
 }
 
 function buildRoutesUI(){
@@ -209,6 +278,82 @@ function buildRoutesUI(){
     if (union) map.fitBounds(union, {padding:60, duration:600});
   });
 }
+// ---- Geodesia básica ----
+function toRad(d){ return d * Math.PI/180; }
+function toDeg(r){ return r * 180/Math.PI; }
+
+function haversine(lat1, lon1, lat2, lon2){
+  const R = 6371000; // m
+  const dLat = toRad(lat2-lat1);
+  const dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function bearing(lat1, lon1, lat2, lon2){
+  const y = Math.sin(toRad(lon2-lon1)) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1))*Math.sin(toRad(lat2)) -
+            Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(toRad(lon2-lon1));
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+function humanDistance(m){
+  if (m < 1000) return `${m.toFixed(0)} m`;
+  return `${(m/1000).toFixed(2)} km`;
+}
+
+let navLine = null; // capa/feature para la línea guía
+
+function drawGuideLine(fromLon, fromLat, toLon, toLat){
+  // elimina línea previa
+  if (map.getLayer('guide-line')) map.removeLayer('guide-line');
+  if (map.getSource('guide-src')) map.removeSource('guide-src');
+
+  const geo = {
+    type:'FeatureCollection',
+    features:[{
+      type:'Feature',
+      geometry:{ type:'LineString', coordinates:[[fromLon,fromLat],[toLon,toLat]] },
+      properties:{}
+    }]
+  };
+  map.addSource('guide-src', { type:'geojson', data: geo });
+  map.addLayer({
+    id:'guide-line',
+    type:'line',
+    source:'guide-src',
+    paint:{
+      'line-color':'#111',
+      'line-dasharray':[2,2],
+      'line-width': 2
+    }
+  });
+}
+
+function nearestTrailhead(lat, lon){
+  if (!trailheads.length) return null;
+  let best=null, bestD=Infinity;
+  for (const th of trailheads){
+    const d = haversine(lat, lon, th.lat, th.lon);
+    if (d < bestD){ bestD = d; best = {th, dist:d}; }
+  }
+  return best;
+}
+
+document.getElementById('btn-navigate')?.addEventListener('click', ()=>{
+  if (!lastPos){ setStatus('Primero activa tu ubicación'); return; }
+  const { latitude:lat, longitude:lon } = lastPos.coords;
+
+  const best = nearestTrailhead(lat, lon);
+  if (!best){ setStatus('No hay salidas detectadas'); return; }
+
+  const { th, dist } = best;
+  const brg = bearing(lat, lon, th.lat, th.lon);
+  setGuide(`Salida: ${th.name} (${th.kind}) • ${humanDistance(dist)} • Rumbo ${brg.toFixed(0)}°`);
+  drawGuideLine(lon, lat, th.lon, th.lat);
+
+  // Opcional: acercar un poco para ver la línea
+  map.fitBounds([[lon,lat],[th.lon,th.lat]], { padding: 60, duration: 600 });
+});
+
 
 map.on('load', async ()=>{
   for (const r of ROUTES){ await loadOneRoute(r); }
