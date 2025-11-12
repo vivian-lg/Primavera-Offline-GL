@@ -10,28 +10,48 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set bounds env
+      - name: Bounds & zoom
         run: |
-          echo "WEST=-103.75" >> $GITHUB_ENV
-          echo "SOUTH=20.50"  >> $GITHUB_ENV
-          echo "EAST=-103.45" >> $GITHUB_ENV
-          echo "NORTH=20.80"  >> $GITHUB_ENV
-          echo "MIN_ZOOM=0"   >> $GITHUB_ENV
-          echo "MAX_ZOOM=14"  >> $GITHUB_ENV
+          echo "WEST=-103.75"  >> $GITHUB_ENV
+          echo "SOUTH=20.50"   >> $GITHUB_ENV
+          echo "EAST=-103.45"  >> $GITHUB_ENV
+          echo "NORTH=20.80"   >> $GITHUB_ENV
+          echo "MIN_ZOOM=10"   >> $GITHUB_ENV   # 10 da contexto; puedes bajar a 12 si prefieres
+          echo "MAX_ZOOM=14"   >> $GITHUB_ENV   # sube a 15 si necesitas más detalle (archivo más grande)
 
-      # Usamos Planetiler en Docker (no instalas nada)
-      - name: Build PMTiles with Planetiler
+      - name: Build PMTiles with Planetiler (Docker)
+        env:
+          # Más memoria para la JVM de Planetiler (ayuda a evitar fallas silenciosas)
+          JAVA_TOOL_OPTIONS: "-Xms1g -Xmx6g"
         run: |
-          docker run --rm -v "$PWD":/data ghcr.io/onthegomap/planetiler:latest \
+          docker run --rm \
+            -e JAVA_TOOL_OPTIONS \
+            -v "$PWD":/data \
+            ghcr.io/onthegomap/planetiler:latest \
             --bounds=$WEST,$SOUTH,$EAST,$NORTH \
-            --output=/data/primavera.pmtiles \
             --download \
+            --min-zoom=$MIN_ZOOM \
             --max-zoom=$MAX_ZOOM \
-            --min-zoom=$MIN_ZOOM
+            --output=/data/primavera.pmtiles
 
-      - name: Upload PMTiles artifact
+      - name: List output
+        run: ls -lh
+
+      # Falla si el archivo es demasiado pequeño (indicio de error)
+      - name: Validate size
+        run: |
+          BYTES=$(stat -c%s "primavera.pmtiles" || stat -f%z "primavera.pmtiles")
+          echo "File size: $BYTES bytes"
+          # exige al menos 5 MB (ajusta si hace falta)
+          if [ "$BYTES" -lt 5000000 ]; then
+            echo "PMTiles too small -> generation failed."
+            exit 1
+          fi
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: primavera.pmtiles
           path: primavera.pmtiles
           if-no-files-found: error
+
