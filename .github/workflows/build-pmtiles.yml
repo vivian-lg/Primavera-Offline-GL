@@ -22,18 +22,15 @@ jobs:
 
       - name: Build PMTiles with Planetiler (Docker)
         env:
-          # Más memoria para la JVM de Planetiler (ayuda a evitar fallas silenciosas)
           JAVA_TOOL_OPTIONS: "-Xms1g -Xmx6g"
         run: |
-          docker run --rm \
-            -e JAVA_TOOL_OPTIONS \
-            -v "$PWD":/data \
-            ghcr.io/onthegomap/planetiler:latest \
+          docker run --rm -e JAVA_TOOL_OPTIONS -v "$PWD":/data ghcr.io/onthegomap/planetiler:latest \
             --bounds=$WEST,$SOUTH,$EAST,$NORTH \
             --download \
             --min-zoom=$MIN_ZOOM \
             --max-zoom=$MAX_ZOOM \
-            --output=/data/primavera.pmtiles
+            --output=/data/primavera.pmtiles \
+            --force
 
       - name: List output
         run: ls -lh
