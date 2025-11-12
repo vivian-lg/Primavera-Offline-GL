@@ -134,22 +134,42 @@ async function addRoutes(){
 async function addPOIs(){
   const pois = await safeFetchJSON('./data/pois.geojson');
   if(!pois) return;
+
   map.addSource('pois', { type:'geojson', data: pois });
+
+  // círculos visibles
   map.addLayer({
-    id:'pois',
-    type:'symbol',
+    id:'pois-circles',
+    type:'circle',
     source:'pois',
-    layout:{
-      'icon-image': 'marker',
-      'icon-size': 1,
-      'text-field': ['get','name'],
-      'text-offset': [0, 1.0],
-      'text-size': 11,
-      'icon-allow-overlap': true
-    },
-    paint:{ 'text-color':'#e9edf1' }
+    paint:{
+      'circle-radius': [
+        'interpolate', ['linear'], ['zoom'],
+        10, 3,
+        14, 6
+      ],
+      'circle-color': [
+        'match', ['get','type'],
+        'signal', '#1e88e5',
+        'restaurant', '#ef6c00',
+        'safe', '#43a047',
+        /* default */ '#8e8e8e'
+      ],
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 1
+    }
   });
+
+  // (opcional) etiquetas si mantienes glyphs online
+  // map.addLayer({
+  //   id:'pois-labels',
+  //   type:'symbol',
+  //   source:'pois',
+  //   layout:{ 'text-field': ['get','name'], 'text-size': 11, 'text-offset':[0,1.2] },
+  //   paint:{ 'text-color':'#334', 'text-halo-color':'#eef3f6', 'text-halo-width':1 }
+  // });
 }
+
 
 map.on('load', () => {
   // Etiquetas de lugares (pueblos/colonias)
@@ -216,16 +236,29 @@ function applyFilters(){
   const fe = document.getElementById('f-easy')?.checked;
   const fm = document.getElementById('f-medium')?.checked;
   const fh = document.getElementById('f-hard')?.checked;
-  if (map.getLayer('routes-line')){
-    map.setFilter('routes-line', [
-      'match', ['get','difficulty'],
-      'easy', fe ? 'easy' : 'x',
-      'medium', fm ? 'medium' : 'x',
-      'hard', fh ? 'hard' : 'x',
-      'x'
-    ]);
+
+  if (!map.getLayer('routes-line')) return;
+
+  const selected = [];
+  if (fe) selected.push('easy');
+  if (fm) selected.push('medium');
+  if (fh) selected.push('hard');
+
+  // Si no hay nada seleccionado, oculta todo
+  if (selected.length === 0) {
+    map.setFilter('routes-line', ['literal', false]);
+    return;
   }
+
+  // Filtro correcto: booleano (true si el valor está en la lista)
+  map.setFilter('routes-line', [
+    'match',
+    ['get','difficulty'],
+    selected, true,
+    false
+  ]);
 }
+
 ['f-easy','f-medium','f-hard'].forEach(id=>{
   document.getElementById(id)?.addEventListener('change', applyFilters);
 });
