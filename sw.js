@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primavera-cache-v1';
+const CACHE_NAME = 'primavera-cache-v3';
 const PRECACHE = [
   './',
   './index.html',
@@ -6,8 +6,8 @@ const PRECACHE = [
   './app.js',
   './manifest.json',
   './data/routes.geojson',
-  './data/pois.geojson'
-  // Nota: más adelante añadiremos './primavera.pmtiles' cuando lo tengas
+  './data/pois.geojson',
+  './primavera.pmtiles'   // <- importante
 ];
 
 self.addEventListener('install', e=>{
