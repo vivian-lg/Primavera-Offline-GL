@@ -6,10 +6,6 @@ const plusEl   = document.getElementById('pluscode');
 const guideEl  = document.getElementById('guide');
 function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
 
-// Registrar protocolo pmtiles (para cuando agreguemos PMTiles offline)
-const protocol = new pmtiles.Protocol();
-maplibregl.addProtocol("pmtiles", protocol.tile);
-
 // === Mapa: por ahora usa tiles online de OSM para que veas algo YA.
 // Luego cambiaremos a PMTiles local (offline total).
 const map = new maplibregl.Map({
