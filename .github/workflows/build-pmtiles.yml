@@ -12,7 +12,7 @@ jobs:
 
       - name: Bounds & zoom
         run: |
-          # OJO: orden lon,lat (west,south,east,north)
+          # OJO: lon,lat -> west,south,east,north
           echo "WEST=-104.00"  >> $GITHUB_ENV
           echo "SOUTH=20.30"   >> $GITHUB_ENV
           echo "EAST=-103.20"  >> $GITHUB_ENV
