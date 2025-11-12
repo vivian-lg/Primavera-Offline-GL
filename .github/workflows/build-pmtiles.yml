@@ -19,23 +19,23 @@ jobs:
           echo "NORTH=20.95"   >> $GITHUB_ENV
           echo "MIN_ZOOM=10"   >> $GITHUB_ENV
           echo "MAX_ZOOM=14"   >> $GITHUB_ENV
-      
-      - name: Build PMTiles with Planetiler (no Docker, México)
-        env:
-          JAVA_TOOL_OPTIONS: "-Xms1g -Xmx6g"
+
+      - name: Clean previous output
+        run: rm -f primavera.pmtiles
+
+      - name: Build PMTiles with Planetiler (Docker + Mexico extract)
         run: |
-          curl -L -o planetiler.jar https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar
-          java -Xms1g -Xmx6g -jar planetiler.jar \
+          docker run --rm -v "$PWD":/data ghcr.io/onthegomap/planetiler:latest \
             --osm-url=https://download.geofabrik.de/north-america/mexico-latest.osm.pbf \
             --bounds=$WEST,$SOUTH,$EAST,$NORTH \
             --min-zoom=$MIN_ZOOM \
             --max-zoom=$MAX_ZOOM \
-            --output=primavera.pmtiles \
+            --output=/data/primavera.pmtiles \
             --force
-      
+
       - name: List output
         run: ls -lh
-      
+
       - name: Validate size (>= 5 MB)
         run: |
           BYTES=$(stat -c%s "primavera.pmtiles" || stat -f%z "primavera.pmtiles")
@@ -44,7 +44,7 @@ jobs:
             echo "PMTiles too small -> generation failed."
             exit 1
           fi
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
