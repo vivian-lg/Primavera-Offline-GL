@@ -12,22 +12,37 @@ const map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
+
+    // ⚠️ Esto sirve etiquetas desde internet. Si quieres 100% offline, luego te paso cómo empacar glyphs locales.
+    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+
     sources: {
-      "primavera": {
-        type: "raster",
-        tiles: ["pmtiles://./primavera.pmtiles/{z}/{x}/{y}"],
-        tileSize: 256,
-        attribution: "© OpenStreetMap"
-      }
+      // Tu fuente base: vector desde PMTiles local
+      primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
     },
     layers: [
-      { id: "bg", type: "background", paint: { "background-color": "#0f1115" } },
-      { id: "raster", type: "raster", source: "primavera" }
+      { id: "bg", type: "background", paint: { "background-color": "#eef3f6" } },
+
+      // Agua
+      { id: "water",
+        type: "fill", source: "primavera", "source-layer": "water",
+        paint: { "fill-color": "#b5d0e6" } },
+
+      // Vegetación / landcover (si existe)
+      { id: "landcover",
+        type: "fill", source: "primavera", "source-layer": "landcover",
+        paint: { "fill-color": "#d9ebc6", "fill-opacity": 0.6 } },
+
+      // Caminos
+      { id: "roads",
+        type: "line", source: "primavera", "source-layer": "transportation",
+        paint: { "line-color": "#888", "line-width": 1.2 } }
     ]
   },
   center: [-103.60, 20.65],
   zoom: 12
 });
+
 
 
 // ====== CARGA DATOS (de momento estarán vacíos; los crearás en pasos siguientes)
