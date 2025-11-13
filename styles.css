@@ -1,3 +1,4 @@
+/* Layout base */
 html, body {
   height: 100%;
   margin: 0;
@@ -5,29 +6,28 @@ html, body {
   font: 14px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-#panel{
-  position: absolute; left: 12px; bottom: 12px; 
-  background: rgba(20,22,27,.92); color:#e8eef6; 
-  padding:10px; border-radius:12px; 
-  max-width: 320px; font-size:14px; 
-  box-shadow: 0 6px 24px rgba(0,0,0,.25);
+/* Mapa ocupa toda la pantalla, detrás de overlays */
+#map {
+  position: fixed;
+  inset: 0;            /* top:0 right:0 bottom:0 left:0 */
+  z-index: 0;
 }
-#panel button{ font-size:12px; padding:6px 8px; border-radius:8px; }
-.panel-row{ display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
-.route-item{ display:flex; align-items:center; gap:8px; padding:4px 0; }
-.route-color{ width:12px; height:12px; border-radius:3px; box-shadow:0 0 0 1px #0006 inset; }
-.route-name{ flex:1; }
-.route-zoom{ font-size:12px; padding:2px 6px; border-radius:6px; }
 
-
+/* Barra superior flotante */
 #topbar {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  z-index: 10;
   display: flex;
   gap: 12px;
   align-items: center;
   padding: 8px 12px;
   background: #ffffffcc;
   backdrop-filter: blur(6px);
-  border-bottom: 1px solid #e6eef4;
+  border: 1px solid #e6eef4;
+  border-radius: 10px;
 }
 
 #topbar button {
@@ -37,7 +37,6 @@ html, body {
   background: #fff;
   cursor: pointer;
 }
-
 #topbar button:hover { background: #f3f7fb; }
 
 #topbar .status {
@@ -45,6 +44,52 @@ html, body {
   color: #445;
   opacity: .8;
 }
+
+/* Panel lateral flotante (overlay) */
+#panel {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 10;                /* asegura clics por encima del mapa */
+  background: rgba(20,22,27,.92);
+  color:#e8eef6;
+  padding:10px;
+  border-radius:12px;
+  max-width: 320px;
+  max-height: 70vh;           /* si hay muchas rutas, que scrollee */
+  overflow: auto;
+  font-size:14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.25);
+}
+
+#panel button{ font-size:12px; padding:6px 8px; border-radius:8px; }
+.panel-row{ display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+.route-item{ display:flex; align-items:center; gap:8px; padding:4px 0; }
+.route-color{ width:12px; height:12px; border-radius:3px; box-shadow:0 0 0 1px #0006 inset; }
+.route-name{ flex:1; }
+.route-zoom{ font-size:12px; padding:2px 6px; border-radius:6px; }
+
+/* Tarjeta de guía (rumbo/distancia) */
+#guide {
+  position: fixed;
+  left: 12px;
+  bottom: calc(12px + 8px + 180px); /* sube un poco sobre el panel, ajusta si quieres */
+  z-index: 10;
+  background:#ffffff;
+  color:#223;
+  padding:6px 10px;
+  border-radius:8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.15);
+}
+
+/* Responsive: en pantallas chicas reduce paddings y anchos */
+@media (max-width: 600px) {
+  #panel { max-width: 90vw; }
+  #guide { bottom: calc(12px + 8px + 160px); }
+  #topbar { gap: 8px; padding: 6px 8px; }
+  #topbar button { padding: 6px 8px; }
+}
+
 
 #map {
   height: calc(100% - 46px);
