@@ -135,7 +135,7 @@ const routeLayers = new Map(); // id -> {sourceId, layerId, bounds}
 const trailheads = []; // { id, name, kind: 'start'|'end', lat, lon }
 
 async function loadOneRoute(route){
-  const r = await fetch(route.file);
+  const r = await fetch(encodeURI(route.file));
   if(!r.ok){ console.warn('No pude cargar', route.file); return; }
   const geo = await r.json();
 
