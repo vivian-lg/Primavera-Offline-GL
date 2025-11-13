@@ -23,7 +23,7 @@ const map = new maplibregl.Map({
 });
 
 const ROUTES = [
-  { id:'catarina',   name:'Ruta la catarina', file:'routes_geojson/Ruta la catarina.geojson' },
+  { id:'catarina',   name:'Ruta la catarina', file:'routes_geojson/Ruta-la-catarina.geojson' },
   { id:'huevona',    name:'Huevona',           file:'routes_geojson/huevona.geojson' },
   { id:'bypass',     name:'By Pass',           file:'routes_geojson/by-pass-516314.geojson' },
   { id:'espinazo',   name:'Espinazo',          file:'routes_geojson/espinazo.geojson' },
