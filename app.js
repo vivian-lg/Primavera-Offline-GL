@@ -372,6 +372,32 @@ document.getElementById('btn-navigate')?.addEventListener('click', ()=>{
   map.fitBounds([[lon,lat],[th.lon,th.lat]],{padding:60,duration:600});
 });
 
+function applyDifficultyFilters(){
+  const showGreen = document.getElementById('f-green')?.checked;
+  const showBlue  = document.getElementById('f-blue')?.checked;
+  const showBlack = document.getElementById('f-black')?.checked;
+
+  for (const f in ROUTE_IDS){
+    const { layerId } = ROUTE_IDS[f] || {};
+    if (!layerId || !map.getLayer(layerId)) continue;
+
+    const diff = DIFFICULTY_BY_FILE[f] || 'blue';
+    const visible =
+      (diff === 'green' && showGreen) ||
+      (diff === 'blue'  && showBlue)  ||
+      (diff === 'black' && showBlack);
+
+    map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+  }
+}
+
+// listeners
+['f-green','f-blue','f-black'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change', applyDifficultyFilters);
+});
+// aplica una vez cuando ya estén las capas listas
+map.on('idle', applyDifficultyFilters);
+
 // =================== Arranque ===================
 map.on('load', async ()=>{
   loadAllRoutes();
