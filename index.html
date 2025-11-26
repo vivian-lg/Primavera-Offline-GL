@@ -3,32 +3,34 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Primavera MVP</title>
+  <title>Primavera Offline</title>
 
   <!-- MapLibre -->
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet"/>
 
-  <!-- Estilos propios -->
+  <!-- Estilos -->
   <link rel="stylesheet" href="./styles.css"/>
 
-  <!-- Favicon para evitar 404 en consola -->
+  <!-- Favicon para evitar 404 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22>🗺️</text></svg>">
 </head>
 <body>
-  <!-- Barra superior minimal -->
-<div id="topbar">
-  <button id="btn-locate">📍 Mi ubicación</button>
-  <button id="btn-follow">🧭 Seguirme: OFF</button>
-  <button id="btn-navigate">➡️ Navegar a salida</button>
-  <span>Plus Code: <b id="pluscode">—</b></span>
-  <span id="status" class="status">Listo</span>
-</div>
+  <!-- Barra superior -->
+  <div id="topbar">
+    <button id="btn-locate">📍 Mi ubicación</button>
+    <button id="btn-follow">🧭 Seguirme: OFF</button>
+    <button id="btn-navigate">➡️ Navegar a salida</button>
+    <span>Plus Code: <b id="pluscode">—</b></span>
+    <span id="status" class="status">Listo</span>
+  </div>
 
   <!-- Mapa -->
   <div id="map"></div>
-  
+
+  <!-- Guía (rumbo/distancia) -->
   <div id="guide" class="guide">—</div>
-  <!-- Panel lateral (debe ir en el body, no en el head) -->
+
+  <!-- Panel capas -->
   <div id="panel">
     <div class="panel-row">
       <button id="btn-zoom-all">🔍 Zoom a todas</button>
@@ -48,11 +50,11 @@
   <!-- App -->
   <script src="./app.js"></script>
 
+  <!-- Service Worker (activar en producción) -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
   </script>
-
 </body>
 </html>
