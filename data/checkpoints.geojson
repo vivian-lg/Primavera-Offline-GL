@@ -1,0 +1,9 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type":"Feature",
+      "properties": { "name":"Checkpoint 1", "notes":"Agua / Herramientas", "kind":"checkpoint" },
+      "geometry": { "type":"Point", "coordinates":[-103.5922, 20.6689] }
+    }
+  ]
+}
