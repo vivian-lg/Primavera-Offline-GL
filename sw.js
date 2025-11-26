@@ -10,6 +10,8 @@ const PRECACHE = [
   // Nota: NO pongas aquí una string fija distinta a la request real,
   // el fetch usará la URL absoluta real y esa será la clave.
   './primavera.pmtiles'
+  './fonts/Noto Sans Regular/0-255.pbf',
+  './fonts/Noto Sans Regular/256-511.pbf'
 ];
 
 self.addEventListener('install', (e) => {
@@ -52,17 +54,18 @@ async function getPmtilesBlobForRequest(req) {
 }
 
 self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
+  //const req = event.request;
+  //const url = new URL(req.url);
+  const url = new URL(event.request.url);
 
   // 1) Fuentes/glyphs locales (si luego las empaquetas). Usa includes o termina con .pbf
-  if (url.pathname.includes('/fonts/') || url.pathname.endsWith('.pbf')) {
+if (url.pathname.startsWith('/Primavera-Offline-GL/fonts/')) {
     event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(req);
-      if (cached) return cached;
-      const net = await fetch(req);
-      if (req.method === 'GET' && net.ok) await cache.put(req, net.clone());
+      const c = await caches.open(CACHE_NAME);
+      const hit = await c.match(event.request);
+      if (hit) return hit;
+      const net = await fetch(event.request);
+      c.put(event.request, net.clone());
       return net;
     })());
     return;
