@@ -1,5 +1,5 @@
 // sw.js — PMTiles offline con soporte de Range/HEAD + glyphs + rutas/pois
-const CACHE_NAME = 'primavera-cache-v23';
+const CACHE_NAME = 'primavera-cache-v24';
 const PRECACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const PRECACHE = [
   './app.js',
   './manifest.json',
   './libs/openlocationcode.js',
+  './libs/pmtiles.js', 
   './primavera.pmtiles',
   './fonts/Noto Sans Regular/0-255.pbf',
   './fonts/Noto Sans Regular/256-511.pbf',
