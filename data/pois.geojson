@@ -1,4 +1,13 @@
 {
   "type": "FeatureCollection",
-  "features": []
+  "features": [
+    /* Puedes dejar vacío el array o poner ejemplos:
+    {
+      "type": "Feature",
+      "properties": { "name": "Punto seguro", "type": "safe" },
+      "geometry": { "type": "Point", "coordinates": [-103.60, 20.65] }
+    }
+    */
+  ]
 }
+
