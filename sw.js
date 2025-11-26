@@ -1,5 +1,5 @@
-// sw.js — Manejo correcto de HEAD/Range para PMTiles en GitHub Pages
-const CACHE_NAME = 'primavera-cache-v25';
+// sw.js — PMTiles con HEAD/Range correctos y sin Content-Encoding
+const CACHE_NAME = 'primavera-cache-v26';
 const PRECACHE = [
   './',
   './index.html',
@@ -9,9 +9,6 @@ const PRECACHE = [
   './libs/openlocationcode.js',
   './manifest.json',
   './primavera.pmtiles',
-  './fonts/Noto Sans Regular/0-255.pbf',
-  './fonts/Noto Sans Regular/256-511.pbf',
-  './data/pois.geojson'
 ];
 
 self.addEventListener('install', (e) => {
@@ -35,7 +32,6 @@ async function getPmtilesBlob() {
   const cache = await caches.open(CACHE_NAME);
   let resp = await cache.match('./primavera.pmtiles');
   if (!resp) {
-    // Trae de red una vez y guarda el binario tal cual
     const net = await fetch('./primavera.pmtiles', { cache: 'reload' });
     await cache.put('./primavera.pmtiles', net.clone());
     resp = net;
@@ -46,16 +42,15 @@ async function getPmtilesBlob() {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Intercepta SIEMPRE el .pmtiles (para evitar Content-Encoding del server)
+  // Intercepta SIEMPRE el pmtiles
   if (url.pathname.endsWith('/primavera.pmtiles') || url.pathname.endsWith('primavera.pmtiles')) {
-    const { method } = event.request;
     const range = event.request.headers.get('Range');
+    const method = event.request.method;
 
     event.respondWith((async () => {
       const blob = await getPmtilesBlob();
       const size = blob.size;
 
-      // HEAD: regresa sólo headers (sin Content-Encoding)
       if (method === 'HEAD') {
         return new Response(null, {
           status: 200,
@@ -68,12 +63,10 @@ self.addEventListener('fetch', (event) => {
         });
       }
 
-      // GET con Range: 206 Partial Content (sin Content-Encoding)
       if (range) {
         const m = /bytes=(\d+)-(\d+)?/.exec(range);
         const start = m && m[1] ? Number(m[1]) : 0;
         const end = (m && m[2]) ? Math.min(Number(m[2]), size - 1) : size - 1;
-
         const chunk = blob.slice(start, end + 1);
         return new Response(chunk, {
           status: 206,
@@ -87,7 +80,6 @@ self.addEventListener('fetch', (event) => {
         });
       }
 
-      // GET sin Range: 200 (sin Content-Encoding)
       return new Response(blob, {
         status: 200,
         headers: {
@@ -101,7 +93,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first simple para el resto (HTML/CSS/JS/etc.)
+  // Cache-first para lo demás
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(event.request);
