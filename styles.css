@@ -9,7 +9,7 @@ html, body {
 /* Mapa ocupa toda la pantalla, detrás de overlays */
 #map {
   position: fixed;
-  inset: 0;            /* top:0 right:0 bottom:0 left:0 */
+  inset: 0;   /* top, right, bottom, left = 0 */
   z-index: 0;
 }
 
@@ -45,23 +45,22 @@ html, body {
   opacity: .8;
 }
 
+/* Panel lateral flotante (overlay) */
 #panel {
   position: fixed;
   left: 12px;
   bottom: 12px;
-  z-index: 10;
-  pointer-events: auto;   /* asegura que reciba clics */
+  z-index: 10;                /* por encima del mapa */
   background: rgba(20,22,27,.92);
   color:#e8eef6;
   padding:10px;
   border-radius:12px;
   max-width: 320px;
-  max-height: 70vh;
+  max-height: 70vh;           /* si hay muchas rutas, que scrollee */
   overflow: auto;
   font-size:14px;
   box-shadow: 0 6px 24px rgba(0,0,0,.25);
 }
-
 
 #panel button{ font-size:12px; padding:6px 8px; border-radius:8px; }
 .panel-row{ display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
@@ -74,7 +73,7 @@ html, body {
 #guide {
   position: fixed;
   left: 12px;
-  bottom: calc(12px + 8px + 180px); /* sube un poco sobre el panel, ajusta si quieres */
+  bottom: calc(12px + 8px + 180px); /* ajusta según tamaño del panel */
   z-index: 10;
   background:#ffffff;
   color:#223;
@@ -83,13 +82,10 @@ html, body {
   box-shadow: 0 6px 24px rgba(0,0,0,.15);
 }
 
-/* Responsive: en pantallas chicas reduce paddings y anchos */
+/* Responsive */
 @media (max-width: 600px) {
   #panel { max-width: 90vw; }
   #guide { bottom: calc(12px + 8px + 160px); }
   #topbar { gap: 8px; padding: 6px 8px; }
   #topbar button { padding: 6px 8px; }
 }
-
-
-
