@@ -1,0 +1,9 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type":"Feature",
+      "properties": { "name":"Paramédicos Base Norte", "notes":"Radio CH-3", "kind":"paramedics" },
+      "geometry": { "type":"Point", "coordinates":[-103.6045, 20.6823] }
+    }
+  ]
+}
