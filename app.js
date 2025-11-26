@@ -130,6 +130,39 @@ const ROUTE_COLORS = {
   "arenosas.geojson": "#66a61e",
   "ruta-la-catarina.geojson": "#377eb8"
 };
+
+// Dificultad por archivo (sin modificar los .geojson)
+const DIFFICULTY_BY_FILE = {
+  'bosque-nutella.geojson': 'green',
+  'brujas.geojson': 'blue',
+  'ruta-la-catarina.geojson': 'blue',
+  'huevona.geojson': 'green',
+  'by-pass-516314.geojson': 'blue',
+  'vaca-muerta-rivers-combined.geojson': 'green',
+  'torre-03.geojson': 'green',
+  'espinazo.geojson': 'blue',
+  'pinitos-angel.geojson': 'blue',
+  '1-2-mosca.geojson': 'green',
+  'relax.geojson': 'blue',
+  'torre-01.geojson': 'blue',
+  'extension-espinazo.geojson': 'blue',
+  'toboganes-110689.geojson': 'blue',
+  'mago-de-oz.geojson': 'black',
+  'arenosas.geojson': 'blue'
+};
+
+// Colores por dificultad
+const DIFF_COLORS = {
+  green: '#3CB371', // verde
+  blue:  '#1E90FF', // azul
+  black: '#111111'  // negro
+};
+
+function colorForDifficultyName(filename){
+  const diff = DIFFICULTY_BY_FILE[filename] || 'blue';
+  return DIFF_COLORS[diff] || '#999';
+}
+
 const PALETTE = ["#377eb8","#e41a1c","#4daf4a","#984ea3","#ff7f00","#a65628","#f781bf","#999999",
                  "#66c2a5","#fc8d62","#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#17becf"];
 function stableColorFor(name){
@@ -198,11 +231,16 @@ async function addOneRoute(file){
     const layerId = 'r_layer_' + file.replace(/[^\w]/g,'_');
 
     map.addSource(srcId, { type:'geojson', data: geo });
+    const color = colorForDifficultyName(file);
     map.addLayer({
       id: layerId,
       type: 'line',
       source: srcId,
-      paint: { 'line-color': color, 'line-width': 3 }
+      paint: { 'line-color': color, 'line-width': [
+      'interpolate', ['linear'], ['zoom'],
+      10, 2,
+      14, 4
+    ] }
     });
 
     ROUTE_IDS[file] = { srcId, layerId };
