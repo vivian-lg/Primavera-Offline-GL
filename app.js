@@ -226,7 +226,7 @@ async function addOneRoute(file){
       if (f?.properties?.name) displayName = f.properties.name;
     } catch {}
 
-    const color = stableColorFor(file);
+   // const color = stableColorFor(file);
     const srcId   = 'r_src_'   + file.replace(/[^\w]/g,'_');
     const layerId = 'r_layer_' + file.replace(/[^\w]/g,'_');
 
