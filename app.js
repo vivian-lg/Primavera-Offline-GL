@@ -1,3 +1,7 @@
+
+if (!window.pmtiles) {
+  console.error('PMTiles no está cargado. Incluye ./libs/pmtiles.js antes de app.js');
+}
 // =================== PMTiles: evita doble registro ===================
 if (!window.__pmtilesProtocolAdded) {
   window.__pmtilesProtocol = new pmtiles.Protocol();
