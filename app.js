@@ -1,7 +1,4 @@
 
-if (!window.pmtiles) {
-  console.error('PMTiles no está cargado. Incluye ./libs/pmtiles.js antes de app.js');
-}
 // =================== PMTiles: evita doble registro ===================
 if (!window.__pmtilesProtocolAdded) {
   window.__pmtilesProtocol = new pmtiles.Protocol();
@@ -20,7 +17,7 @@ const map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
-    glyphs: "./fonts/{fontstack}/{range}.pbf",
+    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
     sources: {
       primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
     },
