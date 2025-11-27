@@ -2,8 +2,8 @@
   "type": "FeatureCollection",
   "features": [
     { "type":"Feature",
-      "properties": { "name":"Checkpoint 1", "notes":"Agua / Herramientas", "kind":"checkpoint" },
-      "geometry": { "type":"Point", "coordinates":[-103.5922, 20.6689] }
+      "properties": { "name":"Estacionamiento 8 1/2", "notes":"Baños", "kind":"checkpoint" },
+      "geometry": { "type":"Point", "coordinates":[-103.510562,20.617688] }
     }
   ]
 }
