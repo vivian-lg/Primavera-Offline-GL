@@ -63,7 +63,7 @@
         "kind": "paramedic"  
       },
       "geometry": { "type":"Point", "coordinates":[-103.530918, 20.607920] }  
-    },
+    }
   ]
 }
 
