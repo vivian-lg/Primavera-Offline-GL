@@ -1,5 +1,5 @@
 // sw.js — PMTiles con HEAD/Range correctos y sin Content-Encoding
-const CACHE_NAME = 'primavera-cache-v26';
+const CACHE_NAME = 'primavera-cache-v27';
 const PRECACHE = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const PRECACHE = [
   './libs/openlocationcode.js',
   './manifest.json',
   './primavera.pmtiles',
+  './data/paramedics.geojson',
+  './data/checkpoints.geojson'
 ];
 
 self.addEventListener('install', (e) => {
