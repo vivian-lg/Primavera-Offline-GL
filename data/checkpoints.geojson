@@ -8,7 +8,12 @@
     },
     {
       "type":"Feature",
-      "properties": { "name":"Restaurante El Tecuán", "notes":"Baños\nKit Primeros Auxilios", "kind":"checkpoint" },
+      "properties": { "name":"Restaurante Checkpoint La Primavera", "notes":"Baños", "kind":"checkpoint" },
+      "geometry": { "type":"Point", "coordinates":[-103.534937, 20.615437] }
+    },
+    {
+      "type":"Feature",
+      "properties": { "name":"Restaurante El Tecuán", "notes":"Baños, Kit Primeros Auxilios", "kind":"checkpoint" },
       "geometry": { "type":"Point", "coordinates":[-103.520437, 20.614187] }
     }
   ]
