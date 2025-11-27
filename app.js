@@ -503,27 +503,27 @@ async function addPointLayer(opts){
 map.on('idle', applyDifficultyFilters);
 
 // =================== Arranque ===================
-//map.on('load', async ()=>{
-//  loadAllRoutes();
-//  await addPOIs();
-//  setStatus('Mapa cargado');
-//});
-
 map.on('load', async ()=>{
-  // ... tus rutas, addPOIs(), etc.
+  // 1) Cargar rutas y POIs
+  loadAllRoutes();          // <- rutas (necesario para filtros)
+  await addPOIs();          // <- opcional
+
+  // 2) Capas puntuales (paramédicos/checkpoints)
   await addPointLayer({
     key: 'paramedics',
     url: './data/paramedics.geojson',
-    circleColor: '#e53935',  // rojo fuerte
+    circleColor: '#e53935',
     circleRadius: 6
   });
-
   await addPointLayer({
     key: 'checkpoints',
     url: './data/checkpoints.geojson',
-    circleColor: '#1e88e5',  // azul
+    circleColor: '#1e88e5',
     circleRadius: 6
   });
+
+  // 3) Aplica filtros de dificultad una vez que ya hay capas
+  applyDifficultyFilters();
 
   setStatus('Mapa cargado');
 });
