@@ -1,9 +1,69 @@
 {
   "type": "FeatureCollection",
   "features": [
-    { "type":"Feature",
-      "properties": { "name":"Paramédicos Base Norte", "notes":"Radio CH-3", "kind":"paramedics" },
-      "geometry": { "type":"Point", "coordinates":[-103.6045, 20.6823] }
-    }
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu - El Tecuán",
+        "notes": "Botiquín",
+        "kind": "paramedic"
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.520437, 20.614187] }
+    },
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu - El Árbol",
+        "notes": "Paramédicos",
+        "kind": "paramedic"
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.535412, 20.621588] }
+    }, 
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu - Pinitos",
+        "notes": "Botiquín",
+        "kind": "paramedic"
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.535412, 20.621588] }
+    }, 
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu",
+        "notes": "Botiquín",
+        "kind": "paramedic"  
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.545717, 20.620566] }
+    },
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu - Toboganes",
+        "notes": "Paramédicos",
+        "kind": "paramedic"  
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.561229, 20.623409] }
+    },
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu - Brujitas",
+        "notes": "Botiquín",
+        "kind": "paramedic"  
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.582068, 20.606554] }  
+    },
+    {
+      "type":"Feature",
+      "properties": {
+        "name": "Mas Bosque Manu - Vaca",
+        "notes": "Botiquín",
+        "kind": "paramedic"  
+      },
+      "geometry": { "type":"Point", "coordinates":[-103.530918, 20.607920] }  
+    },
   ]
 }
+
