@@ -1,18 +1,15 @@
 {
   "type": "FeatureCollection",
   "features": [
-    { "type":"Feature",
+    {
+      "type":"Feature",
       "properties": { "name":"Estacionamiento 8 1/2", "notes":"Baños", "kind":"checkpoint" },
-      "geometry": { "type":"Point", "coordinates":[-103.510562,20.617688] }
-    }
-  ]
-},
-{
-  "type": "FeatureCollection",
-  "features": [
-    { "type":"Feature",
-      "properties": { "name":"Restaurante El Tecuán", "notes":"Baños\n Kit Primeros Auxilios ", "kind":"checkpoint" },
-      "geometry": { "type":"Point", "coordinates":[-103.520437,20.614187] }
+      "geometry": { "type":"Point", "coordinates":[-103.510562, 20.617688] }
+    },
+    {
+      "type":"Feature",
+      "properties": { "name":"Restaurante El Tecuán", "notes":"Baños\nKit Primeros Auxilios", "kind":"checkpoint" },
+      "geometry": { "type":"Point", "coordinates":[-103.520437, 20.614187] }
     }
   ]
 }
