@@ -1,5 +1,5 @@
 // sw.js — PMTiles con HEAD/Range correctos y sin Content-Encoding
-const CACHE_NAME = 'primavera-cache-v27';
+const CACHE_NAME = 'primavera-cache-v28';
 const PRECACHE = [
   './',
   './index.html',
