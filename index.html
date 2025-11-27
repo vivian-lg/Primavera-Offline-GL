@@ -37,8 +37,10 @@
       <button id="btn-hide-all">Ocultar todas</button>
       <button id="btn-show-all">Mostrar todas</button>
     </div>
+    
     <details open>
       <summary><strong>Rutas</strong></summary>
+      
       <details open>
         <summary><strong>Filtrar por dificultad</strong></summary>
         <label style="display:inline-flex;align-items:center;gap:6px;margin-right:10px;">
@@ -50,24 +52,24 @@
         <label style="display:inline-flex;align-items:center;gap:6px;">
           <input type="checkbox" id="f-black" checked> Negro
         </label>
-        <details open>
-  <summary><strong>Puntos</strong></summary>
-  <div class="panel-row">
-    <label style="display:flex;align-items:center;gap:6px;">
-      <input type="checkbox" id="toggle-paramedics" checked> Paramédicos
-    </label>
-    <button id="zoom-paramedics">🔍</button>
-
-    <label style="display:flex;align-items:center;gap:6px;margin-left:10px;">
-      <input type="checkbox" id="toggle-checkpoints" checked> Checkpoints
-    </label>
-    <button id="zoom-checkpoints">🔍</button>
-  </div>
-</details>
-
-</details>
-
+      </details>
+      
       <div id="routes-list"></div>
+    </details>
+
+    <details open>
+      <summary><strong>Puntos de interés</strong></summary>
+      <div class="panel-row">
+        <label style="display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="toggle-paramedics" checked> Paramédicos
+        </label>
+        <button id="zoom-paramedics">🔍</button>
+
+        <label style="display:flex;align-items:center;gap:6px;margin-left:10px;">
+          <input type="checkbox" id="toggle-checkpoints" checked> Checkpoints
+        </label>
+        <button id="zoom-checkpoints">🔍</button>
+      </div>
     </details>
   </div>
 
