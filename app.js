@@ -301,6 +301,7 @@ document.getElementById('btn-zoom-all')?.addEventListener('click', ()=>{
 // =================== GPS + Plus Code + Seguirme ===================
 let watchId=null, lastPos=null, followMe=false, hadFirstFix=false, userMarker=null;
 const checkpointPoints = []; // { name, lat, lon }
+const paramedicPoints = []; // { name, lat, lon }
 function updateFollowUI(){
   const b=document.getElementById('btn-follow'); if(!b) return;
   b.textContent = followMe ? '🧭 Seguirme: ON' : '🧭 Seguirme: OFF';
@@ -393,6 +394,20 @@ document.getElementById('btn-navigate-checkpoint')?.addEventListener('click', ()
 
   const brg = bearing(lat, lon, best.lat, best.lon);
   setGuide(`Checkpoint: ${best.name} • ${humanDistance(best.dist)} • Rumbo ${brg.toFixed(0)}°`);
+  drawGuideLine(lon, lat, best.lon, best.lat);
+  map.fitBounds([[lon,lat],[best.lon,best.lat]], { padding: 60, duration: 600 });
+});
+
+document.getElementById('btn-navigate-paramedic')?.addEventListener('click', ()=>{
+  if (!lastPos){ setStatus('Primero activa tu ubicación'); return; }
+  if (!paramedicPoints.length){ setStatus('No hay paramédicos cargados'); return; }
+
+  const { latitude:lat, longitude:lon } = lastPos.coords;
+  const best = nearestPoint(paramedicPoints, lat, lon); // ya tienes nearestPoint
+  if (!best){ setStatus('No hay paramédicos'); return; }
+
+  const brg = bearing(lat, lon, best.lat, best.lon);
+  setGuide(`Paramédicos: ${best.name} • ${humanDistance(best.dist)} • Rumbo ${brg.toFixed(0)}°`);
   drawGuideLine(lon, lat, best.lon, best.lat);
   map.fitBounds([[lon,lat],[best.lon,best.lat]], { padding: 60, duration: 600 });
 });
@@ -552,8 +567,10 @@ map.on('load', async ()=>{
     key: 'paramedics',
     url: './data/paramedics.geojson',
     circleColor: '#e53935',
-    circleRadius: 6
+    circleRadius: 6,
+    collectTo: paramedicPoints
   });
+
   await addPointLayer({
     key: 'checkpoints',
     url: './data/checkpoints.geojson',
