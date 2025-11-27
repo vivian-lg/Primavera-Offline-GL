@@ -6,4 +6,13 @@
       "geometry": { "type":"Point", "coordinates":[-103.510562,20.617688] }
     }
   ]
+},
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type":"Feature",
+      "properties": { "name":"Restaurante El Tecuán", "notes":"Baños\n Kit Primeros Auxilios ", "kind":"checkpoint" },
+      "geometry": { "type":"Point", "coordinates":[-103.520437,20.614187] }
+    }
+  ]
 }
