@@ -391,6 +391,110 @@ function applyDifficultyFilters(){
   }
 }
 
+// ====== Paramédicos & Checkpoints ======
+function bboxFromPoints(geo){
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for(const f of geo.features||[]){
+    const g=f.geometry; if(!g || g.type!=='Point') continue;
+    const [x,y]=g.coordinates;
+    if (x<minX) minX=x; if (y<minY) minY=y;
+    if (x>maxX) maxX=x; if (y>maxY) maxY=y;
+  }
+  if (!isFinite(minX)) return null;
+  return [[minX,minY],[maxX,maxY]];
+}
+
+async function addPointLayer(opts){
+  // opts: {key, url, circleColor, circleRadius}
+  const res = await fetch(opts.url, {cache:'no-cache'});
+  if(!res.ok){ console.warn('No pude cargar', opts.url); return null; }
+  const geo = await res.json();
+
+  const srcId   = `${opts.key}-src`;
+  const lyrId   = `${opts.key}-circles`;
+  const lblId   = `${opts.key}-labels`;
+
+  if (!map.getSource(srcId)){
+    map.addSource(srcId, { type:'geojson', data: geo });
+  }
+
+  if (!map.getLayer(lyrId)){
+    map.addLayer({
+      id: lyrId,
+      type: 'circle',
+      source: srcId,
+      paint: {
+        'circle-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          10, opts.circleRadius ?? 5,
+          14, (opts.circleRadius ?? 5) + 3
+        ],
+        'circle-color': opts.circleColor,
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 1
+      }
+    });
+  }
+
+  // Etiqueta opcional (si tienes glyphs locales funcionando)
+  if (!map.getLayer(lblId)){
+    map.addLayer({
+      id: lblId,
+      type: 'symbol',
+      source: srcId,
+      layout: {
+        'text-field': ['coalesce', ['get','name'], ['get','notes']],
+        'text-size': 11,
+        'text-offset': [0, 1.1]
+      },
+      paint: {
+        'text-color': '#e8eef6',
+        'text-halo-color': '#14161b',
+        'text-halo-width': 1
+      }
+    });
+  }
+
+  // Popup al click
+  map.on('click', lyrId, (e)=>{
+    const f = e.features && e.features[0];
+    if (!f) return;
+    const coords = f.geometry.coordinates.slice();
+    const name   = f.properties?.name || '(Sin nombre)';
+    const notes  = f.properties?.notes || '';
+    new maplibregl.Popup()
+      .setLngLat(coords)
+      .setHTML(`<b>${name}</b><br>${notes}`)
+      .addTo(map);
+  });
+  map.on('mouseenter', lyrId, ()=> map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave', lyrId, ()=> map.getCanvas().style.cursor='');
+
+  // Toggle visibilidad
+  const chk = document.getElementById(`toggle-${opts.key}`);
+  if (chk){
+    const apply = ()=>{
+      const vis = chk.checked ? 'visible' : 'none';
+      if (map.getLayer(lyrId)) map.setLayoutProperty(lyrId, 'visibility', vis);
+      if (map.getLayer(lblId)) map.setLayoutProperty(lblId, 'visibility', vis);
+    };
+    chk.addEventListener('change', apply);
+    // aplica estado inicial
+    apply();
+  }
+
+  // Zoom botón
+  const btn = document.getElementById(`zoom-${opts.key}`);
+  if (btn){
+    btn.addEventListener('click', ()=>{
+      const b = bboxFromPoints(geo);
+      if (b) map.fitBounds(b, {padding: 50, duration: 500});
+    });
+  }
+
+  return {srcId, lyrId, lblId, geo};
+}
+
 // listeners
 ['f-green','f-blue','f-black'].forEach(id=>{
   document.getElementById(id)?.addEventListener('change', applyDifficultyFilters);
@@ -399,8 +503,30 @@ function applyDifficultyFilters(){
 map.on('idle', applyDifficultyFilters);
 
 // =================== Arranque ===================
+//map.on('load', async ()=>{
+//  loadAllRoutes();
+//  await addPOIs();
+//  setStatus('Mapa cargado');
+//});
+
 map.on('load', async ()=>{
-  loadAllRoutes();
-  await addPOIs();
+  // ... tus rutas, addPOIs(), etc.
+  await addPointLayer({
+    key: 'paramedics',
+    url: './data/paramedics.geojson',
+    circleColor: '#e53935',  // rojo fuerte
+    circleRadius: 6
+  });
+
+  await addPointLayer({
+    key: 'checkpoints',
+    url: './data/checkpoints.geojson',
+    circleColor: '#1e88e5',  // azul
+    circleRadius: 6
+  });
+
   setStatus('Mapa cargado');
 });
+
+
+
