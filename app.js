@@ -300,6 +300,7 @@ document.getElementById('btn-zoom-all')?.addEventListener('click', ()=>{
 
 // =================== GPS + Plus Code + Seguirme ===================
 let watchId=null, lastPos=null, followMe=false, hadFirstFix=false, userMarker=null;
+const checkpointPoints = []; // { name, lat, lon }
 function updateFollowUI(){
   const b=document.getElementById('btn-follow'); if(!b) return;
   b.textContent = followMe ? '🧭 Seguirme: ON' : '🧭 Seguirme: OFF';
@@ -345,6 +346,16 @@ function bearing(lat1,lon1,lat2,lon2){
 function humanDistance(m){ return m<1000?`${m.toFixed(0)} m`:`${(m/1000).toFixed(2)} km`; }
 function setGuide(text){ if(guideEl) guideEl.textContent=text||'—'; }
 
+function nearestPoint(points, lat, lon){
+  if (!points?.length) return null;
+  let best = null, bestD = Infinity;
+  for (const p of points){
+    const d = haversine(lat, lon, p.lat, p.lon);
+    if (d < bestD){ bestD = d; best = {...p, dist: d}; }
+  }
+  return best;
+}
+
 function drawGuideLine(fromLon,fromLat,toLon,toLat){
   if(map.getLayer('guide-line')) map.removeLayer('guide-line');
   if(map.getSource('guide-src')) map.removeSource('guide-src');
@@ -371,6 +382,21 @@ document.getElementById('btn-navigate')?.addEventListener('click', ()=>{
   drawGuideLine(lon,lat,th.lon,th.lat);
   map.fitBounds([[lon,lat],[th.lon,th.lat]],{padding:60,duration:600});
 });
+
+document.getElementById('btn-navigate-checkpoint')?.addEventListener('click', ()=>{
+  if (!lastPos){ setStatus('Primero activa tu ubicación'); return; }
+  if (!checkpointPoints.length){ setStatus('No hay checkpoints cargados'); return; }
+
+  const { latitude: lat, longitude: lon } = lastPos.coords;
+  const best = nearestPoint(checkpointPoints, lat, lon);
+  if (!best){ setStatus('No hay checkpoints'); return; }
+
+  const brg = bearing(lat, lon, best.lat, best.lon);
+  setGuide(`Checkpoint: ${best.name} • ${humanDistance(best.dist)} • Rumbo ${brg.toFixed(0)}°`);
+  drawGuideLine(lon, lat, best.lon, best.lat);
+  map.fitBounds([[lon,lat],[best.lon,best.lat]], { padding: 60, duration: 600 });
+});
+
 
 function applyDifficultyFilters(){
   const showGreen = document.getElementById('f-green')?.checked;
@@ -409,6 +435,19 @@ async function addPointLayer(opts){
   const res = await fetch(opts.url, {cache:'no-cache'});
   if(!res.ok){ console.warn('No pude cargar', opts.url); return null; }
   const geo = await res.json();
+
+  if (Array.isArray(opts.collectTo)) {
+    for (const f of geo.features || []) {
+      const g = f.geometry;
+      if (g?.type === 'Point') {
+        const [lon, lat] = g.coordinates;
+        opts.collectTo.push({
+          name: f.properties?.name || '(Sin nombre)',
+          lat, lon
+        });
+      }
+    }
+  }
 
   const srcId   = `${opts.key}-src`;
   const lyrId   = `${opts.key}-circles`;
@@ -519,7 +558,8 @@ map.on('load', async ()=>{
     key: 'checkpoints',
     url: './data/checkpoints.geojson',
     circleColor: '#1e88e5',
-    circleRadius: 6
+    circleRadius: 6,
+    collectTo: checkpointPoints
   });
 
   // 3) Aplica filtros de dificultad una vez que ya hay capas
