@@ -38,7 +38,7 @@ const PRECACHE = [
   './routes_geojson/vaca-muerta-rivers-combined.geojson',
   './routes_geojson/bosque-nutella.geojson',
   './routes_geojson/ruta-la-catarina.geojson'
-  //'./manifest.json',
+  './manifest.json',
 
 ];
 
