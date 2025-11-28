@@ -17,7 +17,7 @@ const map = new maplibregl.Map({
   container: "map",
   style: {
     version: 8,
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+    glyphs: "./fonts/{fontstack}/{range}.pbf",
     sources: {
       primavera: { type: "vector", url: "pmtiles://./primavera.pmtiles" }
     },
