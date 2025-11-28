@@ -89,7 +89,8 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
-    // 2) PMTiles con HEAD/Range correctos
+/*
+  // 2) PMTiles con HEAD/Range correctos
   if (url.pathname.endsWith('.pmtiles')) {
     const req = event.request;
     const method = req.method;
@@ -109,9 +110,9 @@ self.addEventListener('fetch', (event) => {
           }
         });
       }
-
+*/
   // Intercepta SIEMPRE el pmtiles
- /* if (url.pathname.endsWith('/primavera.pmtiles') || url.pathname.endsWith('primavera.pmtiles')) {
+ if (url.pathname.endsWith('/primavera.pmtiles') || url.pathname.endsWith('primavera.pmtiles')) {
    // const range = event.request.headers.get('Range');
    // const method = event.request.method;
 
@@ -129,7 +130,7 @@ self.addEventListener('fetch', (event) => {
             'Cache-Control': 'public, max-age=31536000, immutable',
           }
         });
-      } */
+      } 
   
 
       if (range) {
