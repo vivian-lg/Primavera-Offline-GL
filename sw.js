@@ -1,5 +1,5 @@
 // sw.js — PMTiles con HEAD/Range correctos y sin Content-Encoding
-const CACHE_NAME = 'primavera-cache-v30';
+const CACHE_NAME = 'primavera-cache-v31';
 const PRECACHE = [
   // App shell
   './',
@@ -14,7 +14,7 @@ const PRECACHE = [
 
   // Datos
   './primavera.pmtiles',            // vector tiles offline
-  //'./data/pois.geojson', // quitar?
+  // './data/pois.geojson', // opcional
   './data/paramedics.geojson',
   './data/checkpoints.geojson',
 
@@ -22,6 +22,7 @@ const PRECACHE = [
   './fonts/Noto Sans Regular/0-255.pbf',
   './fonts/Noto Sans Regular/256-511.pbf',
 
+  // Rutas
   './routes_geojson/1-2-mosca.geojson',
   './routes_geojson/arenosas.geojson',
   './routes_geojson/brujas.geojson',
@@ -38,8 +39,6 @@ const PRECACHE = [
   './routes_geojson/vaca-muerta-rivers-combined.geojson',
   './routes_geojson/bosque-nutella.geojson',
   './routes_geojson/ruta-la-catarina.geojson'
-  './manifest.json',
-
 ];
 
 self.addEventListener('install', (e) => {
@@ -73,8 +72,9 @@ async function getPmtilesBlob() {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-    // 1) Glyphs locales: cache-first
-  if (url.pathname.startsWith('/fonts/') || url.pathname.includes('/fonts/')) {
+  // 1) Glyphs locales: cache-first
+  // OJO: en GitHub Pages la ruta incluye el repo: /Primavera-Offline-GL/fonts/...
+  if (url.pathname.includes('/fonts/')) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       const hit = await cache.match(event.request);
@@ -89,12 +89,11 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
-/*
+
   // 2) PMTiles con HEAD/Range correctos
-  if (url.pathname.endsWith('.pmtiles')) {
-    const req = event.request;
-    const method = req.method;
-    const range = req.headers.get('Range');
+  if (url.pathname.endsWith('/primavera.pmtiles') || url.pathname.endsWith('primavera.pmtiles')) {
+    const method = event.request.method;
+    const range  = event.request.headers.get('Range');
 
     event.respondWith((async () => {
       const blob = await getPmtilesBlob();
@@ -110,28 +109,6 @@ self.addEventListener('fetch', (event) => {
           }
         });
       }
-*/
-  // Intercepta SIEMPRE el pmtiles
- if (url.pathname.endsWith('/primavera.pmtiles') || url.pathname.endsWith('primavera.pmtiles')) {
-   // const range = event.request.headers.get('Range');
-   // const method = event.request.method;
-
-    event.respondWith((async () => {
-      const blob = await getPmtilesBlob();
-      const size = blob.size; 
-
-      if (method === 'HEAD') {
-        return new Response(null, {
-          status: 200,
-          headers: {
-            'Content-Length': String(size),
-            'Accept-Ranges': 'bytes',
-            'Content-Type': 'application/octet-stream',
-            'Cache-Control': 'public, max-age=31536000, immutable',
-          }
-        });
-      } 
-  
 
       if (range) {
         const m = /bytes=(\d+)-(\d+)?/.exec(range);
@@ -144,8 +121,7 @@ self.addEventListener('fetch', (event) => {
             'Content-Range': `bytes ${start}-${end}/${size}`,
             'Accept-Ranges': 'bytes',
             'Content-Length': String(end - start + 1),
-            'Content-Type': 'application/octet-stream',
-            'Cache-Control': 'public, max-age=31536000, immutable', //quitar
+            'Content-Type': 'application/octet-stream'
           }
         });
       }
@@ -155,15 +131,14 @@ self.addEventListener('fetch', (event) => {
         headers: {
           'Content-Length': String(size),
           'Accept-Ranges': 'bytes',
-          'Content-Type': 'application/octet-stream',
-          'Cache-Control': 'public, max-age=31536000, immutable', //quitar?
+          'Content-Type': 'application/octet-stream'
         }
       });
     })());
     return;
   }
 
-  // Cache-first para lo demás
+  // 3) Cache-first para lo demás
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(event.request);
