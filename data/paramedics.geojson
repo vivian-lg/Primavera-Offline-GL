@@ -8,7 +8,7 @@
         "notes": "Botiquín",
         "kind": "paramedic"
       },
-      "geometry": { "type":"Point", "coordinates":[-103.520437, 20.614187] }
+      "geometry": { "type":"Point", "coordinates":[-103.520279, 20.614421] }
     },
     {
       "type":"Feature",
