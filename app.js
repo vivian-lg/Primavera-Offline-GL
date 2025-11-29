@@ -499,7 +499,7 @@ async function addPointLayer(opts){
       layout: {
         'text-field': ['coalesce', ['get','name'], ['get','notes']],
         'text-size': 11,
-        'text-offset': [0, 1.1]
+        'text-offset': [0, 1.1],
         'text-font': ['Noto Sans Regular']
       },
       paint: {
