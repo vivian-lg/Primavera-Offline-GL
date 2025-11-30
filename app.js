@@ -10,7 +10,15 @@ if (!window.__pmtilesProtocolAdded) {
 const statusEl = document.getElementById('status');
 const plusEl   = document.getElementById('pluscode');
 const guideEl  = document.getElementById('guide');
-function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
+function setStatus(msg, kind = 'info'){
+  if (!statusBadge) return;
+  statusBadge.textContent = msg || 'Listo';
+  statusBadge.className = 'status-badge'; // limpia clases
+  if (kind === 'ok')    statusBadge.classList.add('ok');
+  if (kind === 'warn')  statusBadge.classList.add('warn');
+  if (kind === 'error') statusBadge.classList.add('error');
+}
+
 
 // =================== Mapa base (vector desde PMTiles) ===================
 const map = new maplibregl.Map({
