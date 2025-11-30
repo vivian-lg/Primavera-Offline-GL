@@ -1,4 +1,4 @@
-/* Layout base */
+/* ==== Base layout ==== */
 html, body {
   height: 100%;
   margin: 0;
@@ -6,20 +6,21 @@ html, body {
   font: 14px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Mapa ocupa toda la pantalla, detrás de overlays */
-#map {
+/* Mapa ocupa toda la pantalla (incluye PWA) */
+#map{
   position: fixed;
-  inset: 0;   /* top, right, bottom, left = 0 */
+  inset: 0;
+  height: 100dvh;  /* mejor que 100vh en móvil */
   z-index: 0;
 }
 
-/* Barra superior flotante */
+/* Barra superior */
 #topbar {
   position: fixed;
   top: 8px;
   left: 8px;
   right: 8px;
-  z-index: 10;
+  z-index: 1200;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -29,7 +30,6 @@ html, body {
   border: 1px solid #e6eef4;
   border-radius: 10px;
 }
-
 #topbar button {
   padding: 6px 10px;
   border: 1px solid #d6e0ea;
@@ -38,43 +38,14 @@ html, body {
   cursor: pointer;
 }
 #topbar button:hover { background: #f3f7fb; }
-
-#topbar .status {
-  margin-left: auto;
-  color: #445;
-  opacity: .8;
-}
-
-/* Panel lateral flotante (overlay) */
-#panel {
-  position: fixed;
-  left: 12px;
-  bottom: 12px;
-  z-index: 10;                /* por encima del mapa */
-  background: rgba(20,22,27,.92);
-  color:#e8eef6;
-  padding:10px;
-  border-radius:12px;
-  max-width: 320px;
-  max-height: 70vh;           /* si hay muchas rutas, que scrollee */
-  overflow: auto;
-  font-size:14px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.25);
-}
-
-#panel button{ font-size:12px; padding:6px 8px; border-radius:8px; }
-.panel-row{ display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
-.route-item{ display:flex; align-items:center; gap:8px; padding:4px 0; }
-.route-color{ width:12px; height:12px; border-radius:3px; box-shadow:0 0 0 1px #0006 inset; }
-.route-name{ flex:1; }
-.route-zoom{ font-size:12px; padding:2px 6px; border-radius:6px; }
+#topbar .status { margin-left: auto; color: #445; opacity: .8; }
 
 /* Tarjeta de guía (rumbo/distancia) */
 #guide {
   position: fixed;
   left: 12px;
-  bottom: calc(12px + 8px + 180px); /* ajusta según tamaño del panel */
-  z-index: 10;
+  bottom: 12px;
+  z-index: 1100;
   background:#ffffff;
   color:#223;
   padding:6px 10px;
@@ -82,10 +53,103 @@ html, body {
   box-shadow: 0 6px 24px rgba(0,0,0,.15);
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  #panel { max-width: 90vw; }
-  #guide { bottom: calc(12px + 8px + 160px); }
-  #topbar { gap: 8px; padding: 6px 8px; }
-  #topbar button { padding: 6px 8px; }
+/* ==== Panel tipo bottom-sheet ==== */
+#panel{
+  position: fixed;
+  z-index: 1090;
+  right: 12px;     /* en desktop aparece como tarjeta flotante */
+  top: 70px;
+  width: 320px;
+  max-height: 70vh;
+  overflow: auto;
+  background: #ffffff;
+  color: #222;
+  padding: 0;      /* el header ya trae padding */
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+
+/* Encabezado del panel para tocar/arrastrar */
+.panel-header{
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  cursor: pointer;
+  z-index: 1;
+}
+.panel-grip{
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(0,0,0,.25);
+  margin: 6px auto 6px;
+}
+.panel-title{
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Contenido interno del panel */
+.panel-row{ display:flex; gap:6px; margin:10px; flex-wrap:wrap; }
+#panel button{ font-size:12px; padding:6px 8px; border-radius:8px; }
+.route-item{ display:flex; align-items:center; gap:8px; padding:4px 10px; }
+.route-color{ width:12px; height:12px; border-radius:3px; box-shadow:0 0 0 1px #0002 inset; }
+.route-name{ flex:1; }
+.route-zoom{ font-size:12px; padding:2px 6px; border-radius:6px; }
+
+/* Botón flotante (abre el panel en móvil cuando está colapsado) */
+.fab{
+  position: fixed;
+  left: 12px;
+  bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
+  z-index: 1100;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: none;
+  background: #14161b;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+  font-size: 14px;
+  opacity: .92;
+}
+.fab.hidden { display: none; }
+
+/* Modo móvil: panel como bottom-sheet */
+@media (max-width: 800px){
+  #panel{
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    top: auto;
+    width: auto;
+    max-height: 48vh;
+    border-radius: 14px 14px 0 0;
+    transform: translateY(0);
+    transition: transform .25s ease;
+    overscroll-behavior: contain;
+  }
+  #panel.collapsed{
+    transform: translateY(calc(100% - 44px)); /* asoma solo el header */
+  }
+
+  /* Ajusta guía para que no quede debajo del panel */
+  #guide { bottom: calc(48vh + 12px); }
+}
+
+/* Safe areas para PWA */
+@supports(padding:max(0px)) {
+  #panel{ padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .fab{ bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+}
+
+/* Scroll suave en móvil */
+#panel{ -webkit-overflow-scrolling: touch; }
+
+/* Detalles del panel */
+@media (max-width: 800px){
+  #panel details[open] > summary { font-weight: 600; }
 }
