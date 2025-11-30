@@ -15,30 +15,66 @@ html, body {
 }
 
 /* Barra superior */
-#topbar {
+#topbar{
   position: fixed;
-  top: 8px;
-  left: 8px;
-  right: 8px;
+  top: max(8px, env(safe-area-inset-top));
+  left: 8px; right: 8px;
   z-index: 1200;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 8px 12px;
+  padding: 6px 8px;
   background: #ffffffcc;
   backdrop-filter: blur(6px);
   border: 1px solid #e6eef4;
   border-radius: 10px;
+
+  /* scroll horizontal */
+  display: block;                 /* contenedor */
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
-#topbar button {
-  padding: 6px 10px;
+
+#topbar .track{
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+
+/* Botones compactos */
+#topbar button{
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 6px 8px;
   border: 1px solid #d6e0ea;
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
+  font-size: 13px;
 }
 #topbar button:hover { background: #f3f7fb; }
 #topbar .status { margin-left: auto; color: #445; opacity: .8; }
+
+#topbar .chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid #e6eef4;
+  border-radius: 8px;
+  background: #fff;
+  color: #445;
+  opacity: .9;
+  font-size: 13px;
+}
+/* Oculta barra de scroll visual pero mantiene el gesto */
+#topbar::-webkit-scrollbar{ height: 0; }
+#topbar{ scrollbar-width: none; } /* Firefox */
+
+/* Muy chico: muestra solo íconos en botones */
+@media (max-width: 480px){
+  #topbar .label{ display: none; }
+}
 
 /* Tarjeta de guía (rumbo/distancia) */
 #guide {
