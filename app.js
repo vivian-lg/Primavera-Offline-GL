@@ -586,5 +586,57 @@ map.on('load', async ()=>{
   setStatus('Mapa cargado');
 });
 
+// ===== Panel responsive (móvil): toggle abrir/cerrar =====
+(function(){
+  const panel = document.getElementById('panel');
+  const fab   = document.getElementById('btn-panel');
+  const head  = document.getElementById('panel-header');
+
+  if (!panel || !fab || !head) return;
+
+  // Estado inicial en móvil: colapsado
+  const isMobile = () => window.matchMedia('(max-width: 800px)').matches;
+  const applyInitial = () => {
+    if (isMobile()) {
+      panel.classList.add('collapsed');
+      fab.classList.remove('hidden');
+    } else {
+      panel.classList.remove('collapsed');
+      fab.classList.add('hidden');
+    }
+  };
+  applyInitial();
+  window.addEventListener('resize', applyInitial);
+
+  const togglePanel = () => {
+    const willCollapse = !panel.classList.contains('collapsed') && isMobile();
+    panel.classList.toggle('collapsed', willCollapse);
+    // Si se colapsa, muestra FAB; si se expande, ocúltalo
+    fab.classList.toggle('hidden', !willCollapse);
+  };
+
+  // Tocar el header alterna colapsado/expandido
+  head.addEventListener('click', togglePanel);
+
+  // FAB siempre expande el panel
+  fab.addEventListener('click', () => {
+    panel.classList.remove('collapsed');
+    fab.classList.add('hidden');
+  });
+
+  // (Opcional) Cerrar si el usuario hace pan hacia abajo en el header
+  let startY = null;
+  head.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, {passive:true});
+  head.addEventListener('touchmove', (e) => {
+    if (startY == null) return;
+    const dy = e.touches[0].clientY - startY;
+    // un pequeño umbral para colapsar
+    if (dy > 30 && isMobile()) {
+      panel.classList.add('collapsed');
+      fab.classList.remove('hidden');
+      startY = null;
+    }
+  }, {passive:true});
+})();
 
 
