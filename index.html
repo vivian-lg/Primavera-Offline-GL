@@ -28,12 +28,19 @@
 
   <!-- Mapa -->
   <div id="map"></div>
+  <!-- Botón flotante para mostrar/ocultar panel en móvil -->
+  <button id="btn-panel" class="fab">☰ Capas</button>
+
 
   <!-- Guía (rumbo/distancia) -->
   <div id="guide" class="guide">—</div>
 
   <!-- Panel capas -->
   <div id="panel">
+      <div class="panel-header" id="panel-header">
+      <div class="panel-grip"></div>
+    <div class="panel-title">Capas y filtros</div>
+    </div>
     <div class="panel-row">
       <button id="btn-zoom-all">🔍 Zoom a todas</button>
       <button id="btn-hide-all">Ocultar todas</button>
