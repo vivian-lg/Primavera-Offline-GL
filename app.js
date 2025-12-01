@@ -10,10 +10,11 @@ if (!window.__pmtilesProtocolAdded) {
 const statusEl = document.getElementById('status');
 const plusEl   = document.getElementById('pluscode');
 const guideEl  = document.getElementById('guide');
-function setStatus(msg, kind = 'info'){
+const statusBadge = document.getElementById('status-badge');
+function setStatus(msg, kind='info'){
   if (!statusBadge) return;
   statusBadge.textContent = msg || 'Listo';
-  statusBadge.className = 'status-badge'; // limpia clases
+  statusBadge.className = 'status-badge';  // reset base
   if (kind === 'ok')    statusBadge.classList.add('ok');
   if (kind === 'warn')  statusBadge.classList.add('warn');
   if (kind === 'error') statusBadge.classList.add('error');
