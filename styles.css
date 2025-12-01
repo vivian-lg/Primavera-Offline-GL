@@ -76,27 +76,33 @@ html, body {
   #topbar .label{ display: none; }
 }
 
-/* Badge fija de estado (no scrollea) */
-#status-badge{
+/* Badge de estado fijo esquina superior izquierda */
+.status-badge{
   position: fixed;
-  top: max(8px, env(safe-area-inset-top, 8px));
-  right: 8px;
-  z-index: 1300;
-  padding: 6px 10px;
-  font-size: 12px;
+  top: max(6px, env(safe-area-inset-top, 6px));
+  left: max(8px, env(safe-area-inset-left, 8px));
+  z-index: 1000;                 /* por encima del topbar */
+  padding: 4px 8px;
+  font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   color: #223;
-  background: #ffffffcc;
-  backdrop-filter: blur(6px);
+  background: #ffffffcc;         /* translúcido */
+  backdrop-filter: blur(6px);    /* frosted */
   border: 1px solid #e6eef4;
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(0,0,0,.12);
-  pointer-events: none; /* que no tape taps del mapa */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  pointer-events: none;          /* no bloquea toques debajo */
 }
 
-/* Opcional: estados de color */
-#status-badge.ok    { color:#1b5e20; border-color:#cde8d1; background:#e9f6eccc; }
-#status-badge.warn  { color:#8a6d00; border-color:#f3e7b4; background:#fff7d8cc; }
-#status-badge.error { color:#7a1212; border-color:#f0c8c8; background:#ffe9e9cc; }
+/* variantes (opcional) */
+.status-badge.ok    { color:#135f2b; background:#e9f7efcc; border-color:#cfe9d6; }
+.status-badge.warn  { color:#744a00; background:#fff5dccf; border-color:#ffe2a8; }
+.status-badge.error { color:#6b1111; background:#fdeaea;  border-color:#f5c2c2; }
+
+/* baja un poco el topbar para que no se monten */
+#topbar{
+  top: calc(max(6px, env(safe-area-inset-top, 6px)) + 32px);
+}
+
 
 
 /* Tarjeta de guía (rumbo/distancia) */
