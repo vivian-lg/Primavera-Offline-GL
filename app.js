@@ -258,6 +258,12 @@ async function addOneRoute(file){
 
     // UI fila
     const list = document.getElementById('routes-list');
+    if (!list) { 
+      setStatus('No encuentro #routes-list en el DOM', 'error'); 
+      return; 
+    }
+    console.log('Agregando fila para', displayName);
+
     const wrap = document.createElement('div'); 
     wrap.className='item';              // <— usa clase común clara
     wrap.dataset.name = displayName.toLowerCase();   // <— NUEVO para filtrar
