@@ -16,6 +16,7 @@
 </head>
 <body>
   <div id="status-badge" role="status" aria-live="polite">Listo</div>
+  
   <!-- Barra superior -->
   <div id="topbar">
   <div class="track">
@@ -32,12 +33,11 @@
 </div>
 
 
-
   <!-- Mapa -->
   <div id="map"></div>
+  
   <!-- Botón flotante para mostrar/ocultar panel en móvil -->
   <button id="btn-panel" class="fab">☰ Capas</button>
-
 
   <!-- Guía (rumbo/distancia) -->
   <div id="guide" class="guide">—</div>
@@ -46,7 +46,7 @@
   <div id="panel">
       <div class="panel-header" id="panel-header">
       <div class="panel-grip"></div>
-    <div class="panel-title">Capas y filtros</div>
+    <div class="panel-title">Filtros</div>
     </div>
     <div class="panel-row">
       <button id="btn-zoom-all">🔍 Zoom a todas</button>
@@ -75,6 +75,22 @@
 
     <details open>
       <summary><strong>Puntos de interés</strong></summary>
+
+      <details open>
+  <summary><strong>Paramédicos</strong></summary>
+  <div class="panel-row" style="margin-bottom:8px;">
+    <input id="search-paramedics" type="search" placeholder="Buscar..." style="flex:1;padding:6px 8px;border-radius:8px;border:1px solid #d6e0ea;">
+  </div>
+  <div id="paramedics-list"></div>
+</details>
+
+      <details open>
+  <summary><strong>Checkpoints</strong></summary>
+  <div class="panel-row" style="margin-bottom:8px;">
+    <input id="search-checkpoints" type="search" placeholder="Buscar..." style="flex:1;padding:6px 8px;border-radius:8px;border:1px solid #d6e0ea;">
+  </div>
+  <div id="checkpoints-list"></div>
+</details>
       <div class="panel-row">
         <label style="display:flex;align-items:center;gap:6px;">
           <input type="checkbox" id="toggle-paramedics" checked> Paramédicos
