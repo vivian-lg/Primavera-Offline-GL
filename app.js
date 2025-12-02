@@ -7,7 +7,7 @@ if (!window.__pmtilesProtocolAdded) {
 }
 
 // =================== UI refs ===================
-const statusEl = document.getElementById('status');
+// const statusEl = document.getElementById('status');
 const plusEl   = document.getElementById('pluscode');
 const guideEl  = document.getElementById('guide');
 const statusBadge = document.getElementById('status-badge');
@@ -56,54 +56,6 @@ const map = new maplibregl.Map({
 
 // Etiquetas usando fuente local
 map.on('load', () => {
-  function ensureParamedicHighlight(){
-  if (!map.getSource('paramedic-highlight-src')){
-    map.addSource('paramedic-highlight-src', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
-    map.addLayer({
-      id:'paramedic-highlight',
-      type:'circle',
-      source:'paramedic-highlight-src',
-      paint:{
-        'circle-radius': ['interpolate',['linear'],['zoom'], 10,7, 14,10],
-        'circle-color':'#ffcc00',
-        'circle-stroke-color':'#111',
-        'circle-stroke-width':2
-      }
-    });
-  }
-}
-function setParamedicHighlight(lon,lat){
-  const geo = {
-    type:'FeatureCollection',
-    features:[{ type:'Feature', geometry:{ type:'Point', coordinates:[lon,lat] } }]
-  };
-  map.getSource('paramedic-highlight-src')?.setData(geo);
-}
-
-  function ensureCheckpointHighlight(){
-  if (!map.getSource('checkpoint-highlight-src')){
-    map.addSource('checkpoint-highlight-src', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
-    map.addLayer({
-      id:'checkpoint-highlight',
-      type:'circle',
-      source:'checkpoint-highlight-src',
-      paint:{
-        'circle-radius': ['interpolate',['linear'],['zoom'], 10,7, 14,10],
-        'circle-color':'#00d1b2',           // turquesa para diferenciar
-        'circle-stroke-color':'#111',
-        'circle-stroke-width':2
-      }
-    });
-  }
-}
-function setCheckpointHighlight(lon,lat){
-  const geo = {
-    type:'FeatureCollection',
-    features:[{ type:'Feature', geometry:{ type:'Point', coordinates:[lon,lat] } }]
-  };
-  map.getSource('checkpoint-highlight-src')?.setData(geo);
-}
-
   map.addLayer({
     id: 'place-label',
     type: 'symbol',
@@ -482,10 +434,11 @@ function renderCheckpointsList(){
     btnGo.addEventListener('click', ()=>{
       selectRow();
       if (!lastPos){
-        setStatus('Primero activa tu ubicación');
+        setStatus('Primero activa tu ubicación', 'warn');
         map.flyTo({ center:[p.lon,p.lat], zoom:16 });
         return;
       }
+
       const { latitude: lat, longitude: lon } = lastPos.coords;
       const brg = bearing(lat, lon, p.lat, p.lon);
       const dist = haversine(lat, lon, p.lat, p.lon);
@@ -781,6 +734,54 @@ map.on('load', async ()=>{
     circleRadius: 6,
     collectTo: checkpointPoints
   });
+
+  function ensureParamedicHighlight(){
+  if (!map.getSource('paramedic-highlight-src')){
+    map.addSource('paramedic-highlight-src', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
+    map.addLayer({
+      id:'paramedic-highlight',
+      type:'circle',
+      source:'paramedic-highlight-src',
+      paint:{
+        'circle-radius': ['interpolate',['linear'],['zoom'], 10,7, 14,10],
+        'circle-color':'#ffcc00',
+        'circle-stroke-color':'#111',
+        'circle-stroke-width':2
+      }
+    });
+  }
+}
+function setParamedicHighlight(lon,lat){
+  const geo = {
+    type:'FeatureCollection',
+    features:[{ type:'Feature', geometry:{ type:'Point', coordinates:[lon,lat] } }]
+  };
+  map.getSource('paramedic-highlight-src')?.setData(geo);
+}
+
+function ensureCheckpointHighlight(){
+  if (!map.getSource('checkpoint-highlight-src')){
+    map.addSource('checkpoint-highlight-src', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
+    map.addLayer({
+      id:'checkpoint-highlight',
+      type:'circle',
+      source:'checkpoint-highlight-src',
+      paint:{
+        'circle-radius': ['interpolate',['linear'],['zoom'], 10,7, 14,10],
+        'circle-color':'#00d1b2',
+        'circle-stroke-color':'#111',
+        'circle-stroke-width':2
+      }
+    });
+  }
+}
+function setCheckpointHighlight(lon,lat){
+  const geo = {
+    type:'FeatureCollection',
+    features:[{ type:'Feature', geometry:{ type:'Point', coordinates:[lon,lat] } }]
+  };
+  map.getSource('checkpoint-highlight-src')?.setData(geo);
+}
 
   renderParamedicsList();
   renderCheckpointsList();
