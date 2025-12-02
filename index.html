@@ -48,9 +48,14 @@
     <div class="panel-title">Filtros</div>
   </div>
 
-  <!-- RUTAS -->
-  <div class="section" id="sec-rutas">
+ <!-- RUTAS -->
+<div class="section" id="sec-rutas">
+  <div class="section-head">
     <h3>Rutas</h3>
+    <button class="section-toggle" data-target="sec-rutas" aria-expanded="true">▾</button>
+  </div>
+
+  <div class="section-body">
     <input id="search-routes" class="search" type="search" placeholder="Buscar ruta...">
     <div class="row" style="margin-top:8px;">
       <label><input type="checkbox" id="f-green" checked> Verde</label>
@@ -64,10 +69,16 @@
     </div>
     <div id="routes-list" class="list"></div>
   </div>
+</div>
 
-  <!-- PARAMÉDICOS -->
-  <div class="section" id="sec-paramedicos">
+<!-- PARAMÉDICOS -->
+<div class="section" id="sec-paramedicos">
+  <div class="section-head">
     <h3>Paramédicos</h3>
+    <button class="section-toggle" data-target="sec-paramedicos" aria-expanded="true">▾</button>
+  </div>
+
+  <div class="section-body">
     <input id="search-paramedics" class="search" type="search" placeholder="Buscar paramédico...">
     <div id="paramedics-list" class="list"></div>
     <div class="group-actions">
@@ -75,10 +86,16 @@
       <button id="zoom-paramedics">🔍 Zoom paramédicos</button>
     </div>
   </div>
+</div>
 
-  <!-- CHECKPOINTS -->
-  <div class="section" id="sec-checkpoints">
+<!-- CHECKPOINTS -->
+<div class="section" id="sec-checkpoints">
+  <div class="section-head">
     <h3>Checkpoints</h3>
+    <button class="section-toggle" data-target="sec-checkpoints" aria-expanded="true">▾</button>
+  </div>
+
+  <div class="section-body">
     <input id="search-checkpoints" class="search" type="search" placeholder="Buscar checkpoint...">
     <div id="checkpoints-list" class="list"></div>
     <div class="group-actions">
