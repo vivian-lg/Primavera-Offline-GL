@@ -258,26 +258,23 @@ async function addOneRoute(file){
 
     // UI fila
 // UI fila (reemplaza tu bloque actual desde "const list = ..." hasta antes de // trailheads)
+// ... dentro de addOneRoute(file) después de crear color/srcId/layerId y addSource/addLayer:
+
 const list = document.getElementById('routes-list');
-if (!list) { 
-  setStatus('Falta #routes-list en el DOM', 'error'); 
-  return; 
-}
-console.log('Agregando fila para', displayName);
+const wrap = document.createElement('div');
+wrap.className = 'item';
+wrap.dataset.name = displayName.toLowerCase();
+wrap.dataset.layerId = layerId;       // útil si lo necesitas luego
 
-const row = document.createElement('div');
-row.className = 'item';
-row.dataset.name = (displayName || '').toLowerCase();
+const swatch = document.createElement('div');
+swatch.className = 'swatch';
+swatch.style.background = color;
 
-const swatchEl = document.createElement('div');
-swatchEl.className = 'swatch';
-swatchEl.style.background = color;
-
+// ✅ Usamos checkboxEl en todo
 const checkboxEl = document.createElement('input');
 checkboxEl.type = 'checkbox';
 checkboxEl.checked = true;
 checkboxEl.className = 'route-toggle';
-
 
 const nameEl = document.createElement('div');
 nameEl.className = 'name';
@@ -287,21 +284,22 @@ const zoomBtn = document.createElement('button');
 zoomBtn.textContent = '🔍';
 zoomBtn.title = 'Zoom a esta ruta';
 
-// Primero creo TODO y luego lo inserto en el DOM
-row.append(swatchEl, checkboxEl, nameEl, zoomBtn);
-list.appendChild(row);
+wrap.append(swatch, checkboxEl, nameEl, zoomBtn);
+list.appendChild(wrap);
 
-// Listeners DESPUÉS de crear los elementos
-checkboxEl.addEventListener('change', () => {
+// Vincula el checkbox con la visibilidad de la capa
+checkboxEl.addEventListener('change', ()=>{
   if (map.getLayer(layerId)) {
     map.setLayoutProperty(layerId, 'visibility', checkboxEl.checked ? 'visible' : 'none');
   }
 });
 
-zoomBtn.addEventListener('click', () => {
+// Zoom a la ruta
+zoomBtn.addEventListener('click', ()=>{
   const b = bboxOfGeoJSON(geo);
   if (b) map.fitBounds(b, { padding: 40 });
 });
+
 
 
     // trailheads
@@ -328,36 +326,22 @@ function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
 // Botones globales
 document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
   routesMasterVisible = false;
-
-  // Desmarcar filtros y checks + disparar change
+  // opcional: apaga filtros de dificultad
   setAllDifficultyFilters(false);
+  // ✅ desmarca y dispara change para ocultar en el mapa
   setAllRouteToggles(false, true);
-
-  // Ocultar capas por si alguna quedó visible
-  for (const f in ROUTE_IDS){
-    const { layerId } = ROUTE_IDS[f] || {};
-    if (layerId && map.getLayer(layerId)){
-      map.setLayoutProperty(layerId, 'visibility', 'none');
-    }
-  }
 });
 
 document.getElementById('btn-show-all')?.addEventListener('click', ()=>{
   routesMasterVisible = true;
-
-  // Marcar filtros y checks + disparar change
+  // opcional: prende filtros de dificultad
   setAllDifficultyFilters(true);
+  // ✅ marca y dispara change para mostrar en el mapa
   setAllRouteToggles(true, true);
-
-  // Asegurar visibilidad
-  for (const f in ROUTE_IDS){
-    const { layerId } = ROUTE_IDS[f] || {};
-    if (layerId && map.getLayer(layerId)){
-      map.setLayoutProperty(layerId, 'visibility', 'visible');
-    }
-  }
+  // re-aplica filtros por si usas dificultad
   applyDifficultyFilters();
 });
+
 
 
 document.getElementById('btn-zoom-all')?.addEventListener('click', ()=>{
@@ -578,25 +562,20 @@ function applyDifficultyFilters(){
     return;
   }
   
-function setAllDifficultyFilters(state){
-  ['f-green','f-blue','f-black'].forEach(id=>{
-    const el = document.getElementById(id);
-    if (el){
-      el.checked = !!state;
-      el.dispatchEvent(new Event('change', {bubbles:true}));
-    }
+function setAllRouteToggles(state, trigger=false){
+  document.querySelectorAll('.route-toggle').forEach(el=>{
+    el.checked = !!state;
+    if (trigger) el.dispatchEvent(new Event('change', { bubbles:true }));
   });
 }
 
-// Si prefieres no depender de la clase, puedes usar el selector por contenedor:
-function setAllRouteToggles(state, trigger=false){
-  document.querySelectorAll('#routes-list input[type="checkbox"]').forEach(chk=>{
-    chk.checked = !!state;
-    if (trigger){
-      chk.dispatchEvent(new Event('change', {bubbles:true}));
-    }
+function setAllDifficultyFilters(state){
+  ['f-green','f-blue','f-black'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.checked = !!state;
   });
 }
+
 
 
 
