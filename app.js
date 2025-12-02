@@ -328,8 +328,8 @@ function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
 document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
   routesMasterVisible = false;
 
-  //setAllDifficultyFilters(false);
-  //setAllRouteToggles(false);
+  setAllDifficultyFilters(false);
+  setAllRouteToggles(false);
   
   // Desmarca filtros (opcional):
  ['f-green','f-blue','f-black'].forEach(id=>{
