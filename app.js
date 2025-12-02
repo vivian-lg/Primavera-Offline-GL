@@ -328,11 +328,14 @@ function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
 document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
   routesMasterVisible = false;
 
+  setAllDifficultyFilters(false);
+  setAllRouteToggles(false);
+  
   // Desmarca filtros (opcional):
-  ['f-green','f-blue','f-black'].forEach(id=>{
+/*  ['f-green','f-blue','f-black'].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.checked = false;
-  });
+  }); */
 
   // Desmarca cada checkbox de ruta en UI (opcional y recomendado):
   document.querySelectorAll('#routes-list .item input[type="checkbox"]').forEach(chk=>{
@@ -350,9 +353,23 @@ document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
 
 document.getElementById('btn-show-all')?.addEventListener('click', ()=>{
   routesMasterVisible = true;
-  // vuelve a aplicar filtros de dificultad
+
+  // Marca filtros y checks por ruta
+  setAllDifficultyFilters(true);
+  setAllRouteToggles(true);
+
+  // Asegura visibilidad en el mapa
+  for (const f in ROUTE_IDS){
+    const { layerId } = ROUTE_IDS[f] || {};
+    if (layerId && map.getLayer(layerId)){
+      map.setLayoutProperty(layerId, 'visibility', 'visible');
+    }
+  }
+
+  // Reaplica lógica de filtros por si acaso
   applyDifficultyFilters();
 });
+
 
 document.getElementById('btn-zoom-all')?.addEventListener('click', ()=>{
   let union=null;
@@ -571,6 +588,19 @@ function applyDifficultyFilters(){
     }
     return;
   }
+  function setAllDifficultyFilters(state){
+  ['f-green','f-blue','f-black'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.checked = !!state;
+  });
+}
+
+function setAllRouteToggles(state){
+  document.querySelectorAll('#routes-list .route-toggle').forEach(chk=>{
+    chk.checked = !!state;
+  });
+}
+
 
   const showGreen = document.getElementById('f-green')?.checked;
   const showBlue  = document.getElementById('f-blue')?.checked;
