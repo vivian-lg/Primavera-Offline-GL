@@ -273,10 +273,10 @@ const swatchEl = document.createElement('div');
 swatchEl.className = 'swatch';
 swatchEl.style.background = color;
 
-const chk = document.createElement('input');
-chk.type = 'checkbox';
-chk.checked = true;
-chk.className = 'route-toggle';   // <— importante
+const checkboxEl = document.createElement('input');
+checkboxEl.type = 'checkbox';
+checkboxEl.checked = true;
+checkboxEl.className = 'route-toggle';
 
 
 const nameEl = document.createElement('div');
