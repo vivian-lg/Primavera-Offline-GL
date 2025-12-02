@@ -332,10 +332,10 @@ document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
   setAllRouteToggles(false);
   
   // Desmarca filtros (opcional):
-/*  ['f-green','f-blue','f-black'].forEach(id=>{
+ ['f-green','f-blue','f-black'].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.checked = false;
-  }); */
+  });
 
   // Desmarca cada checkbox de ruta en UI (opcional y recomendado):
   document.querySelectorAll('#routes-list .item input[type="checkbox"]').forEach(chk=>{
