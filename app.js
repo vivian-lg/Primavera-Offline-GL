@@ -19,6 +19,8 @@ function setStatus(msg, kind='info'){
   if (kind === 'warn')  statusBadge.classList.add('warn');
   if (kind === 'error') statusBadge.classList.add('error');
 }
+let routesMasterVisible = true; // si es false, TODO ruta queda oculta sin importar filtros
+
 
 
 // =================== Mapa base (vector desde PMTiles) ===================
@@ -262,6 +264,10 @@ async function addOneRoute(file){
     const swatch = document.createElement('div'); 
     swatch.className='swatch'; 
     swatch.style.background=color;
+    // dentro de addOneRoute(file) justo donde creas la fila:
+    wrap.dataset.file = file;     // <- filas saben qué archivo son
+    chk.dataset.file  = file;     // <- checkbox también
+
 
     const chk = document.createElement('input'); 
     chk.type='checkbox'; 
@@ -276,10 +282,17 @@ async function addOneRoute(file){
     zoomBtn.title='Zoom a esta ruta';
 
     wrap.append(swatch, chk, nameEl, zoomBtn); list.appendChild(wrap);
-
+    
     chk.addEventListener('change', ()=>{
-      if (map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility', chk.checked?'visible':'none');
+      // Si el master está apagado, no revivas capas aunque el user checkee
+      if (!routesMasterVisible) {
+        if (map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility','none');
+        return;
+      }
+      // Si master ON: re-aplica filtros (así respeta green/blue/black)
+      applyDifficultyFilters();
     });
+
     zoomBtn.addEventListener('click', ()=>{
       const b=bboxOfGeoJSON(geo); if (b) map.fitBounds(b,{padding:40});
     });
@@ -306,14 +319,35 @@ document.getElementById('search-routes')?.addEventListener('input', ()=>{
 function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
 
 // Botones globales
-document.getElementById('btn-show-all')?.addEventListener('click', ()=>{
-  for(const f in ROUTE_IDS){ const {layerId}=ROUTE_IDS[f]; if(map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility','visible'); }
-  document.querySelectorAll('#routes-list input[type="checkbox"]').forEach(c=> c.checked = true);
-});
 document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
-  for(const f in ROUTE_IDS){ const {layerId}=ROUTE_IDS[f]; if(map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility','none'); }
-  document.querySelectorAll('#routes-list input[type="checkbox"]').forEach(c=> c.checked = false);
+  routesMasterVisible = false;
+
+  // Desmarca filtros (opcional):
+  ['f-green','f-blue','f-black'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+
+  // Desmarca cada checkbox de ruta en UI (opcional y recomendado):
+  document.querySelectorAll('#routes-list .item input[type="checkbox"]').forEach(chk=>{
+    chk.checked = false;
+  });
+
+  // Fuerza oculto de TODAS las capas
+  for (const f in ROUTE_IDS){
+    const { layerId } = ROUTE_IDS[f] || {};
+    if (layerId && map.getLayer(layerId)){
+      map.setLayoutProperty(layerId, 'visibility', 'none');
+    }
+  }
 });
+
+document.getElementById('btn-show-all')?.addEventListener('click', ()=>{
+  routesMasterVisible = true;
+  // vuelve a aplicar filtros de dificultad
+  applyDifficultyFilters();
+});
+
 document.getElementById('btn-zoom-all')?.addEventListener('click', ()=>{
   let union=null;
   for(const f in ROUTE_DATA){
@@ -520,8 +554,18 @@ document.getElementById('btn-navigate-paramedic')?.addEventListener('click', ()=
   map.fitBounds([[lon,lat],[best.lon,best.lat]], { padding: 60, duration: 600 });
 });
 
-
 function applyDifficultyFilters(){
+  // Master OFF => todo oculto
+  if (!routesMasterVisible){
+    for (const f in ROUTE_IDS){
+      const { layerId } = ROUTE_IDS[f] || {};
+      if (layerId && map.getLayer(layerId)){
+        map.setLayoutProperty(layerId, 'visibility', 'none');
+      }
+    }
+    return;
+  }
+
   const showGreen = document.getElementById('f-green')?.checked;
   const showBlue  = document.getElementById('f-blue')?.checked;
   const showBlack = document.getElementById('f-black')?.checked;
@@ -530,13 +574,20 @@ function applyDifficultyFilters(){
     const { layerId } = ROUTE_IDS[f] || {};
     if (!layerId || !map.getLayer(layerId)) continue;
 
+    // 1) ¿el checkbox de esta ruta está marcado?
+    const routeChk = document.querySelector(`#routes-list .item input[type="checkbox"][data-file="${f}"]`);
+    const routeChecked = routeChk ? routeChk.checked : true; // por si acaso
+
+    // 2) ¿pasa filtro de dificultad?
     const diff = DIFFICULTY_BY_FILE[f] || 'blue';
-    const visible =
+    const passesDiff =
       (diff === 'green' && showGreen) ||
       (diff === 'blue'  && showBlue)  ||
       (diff === 'black' && showBlack);
 
-    map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    const shouldShow = routeChecked && passesDiff;
+
+    map.setLayoutProperty(layerId, 'visibility', shouldShow ? 'visible' : 'none');
   }
 }
 
@@ -795,5 +846,17 @@ function setCheckpointHighlight(lon,lat){
     }
   }, {passive:true});
 })();
+
+// Toggle de secciones (minimizar)
+document.querySelectorAll('.section-toggle').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const secId = btn.dataset.target;
+    const sec = document.getElementById(secId);
+    if (!sec) return;
+    const collapsed = !sec.classList.contains('collapsed');
+    sec.classList.toggle('collapsed', collapsed);
+    btn.setAttribute('aria-expanded', String(!collapsed));
+  });
+});
 
 
