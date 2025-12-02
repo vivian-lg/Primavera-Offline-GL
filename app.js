@@ -256,11 +256,25 @@ async function addOneRoute(file){
 
     // UI fila
     const list = document.getElementById('routes-list');
-    const wrap = document.createElement('div'); wrap.className='route-item';
-    const swatch = document.createElement('div'); swatch.className='route-color'; swatch.style.background=color;
-    const chk = document.createElement('input'); chk.type='checkbox'; chk.checked=true;
-    const nameEl = document.createElement('span'); nameEl.className='route-name'; nameEl.textContent=displayName;
-    const zoomBtn = document.createElement('button'); zoomBtn.className='route-zoom'; zoomBtn.textContent='🔍'; zoomBtn.title='Zoom a esta ruta';
+    const wrap = document.createElement('div'); 
+    wrap.className='item';              // <— usa clase común clara
+    wrap.dataset.name = displayName.toLowerCase();   // <— NUEVO para filtrar
+    const swatch = document.createElement('div'); 
+    swatch.className='swatch'; 
+    swatch.style.background=color;
+
+    const chk = document.createElement('input'); 
+    chk.type='checkbox'; 
+    chk.checked=true;
+    
+    const nameEl = document.createElement('div'); 
+    nameEl.className='name'; 
+    nameEl.textContent=displayName;
+    
+    const zoomBtn = document.createElement('button'); 
+    zoomBtn.textContent='🔍';
+    zoomBtn.title='Zoom a esta ruta';
+
     wrap.append(swatch, chk, nameEl, zoomBtn); list.appendChild(wrap);
 
     chk.addEventListener('change', ()=>{
@@ -280,6 +294,14 @@ async function addOneRoute(file){
     setStatus(`Error cargando ${file}`);
   }
 }
+
+document.getElementById('search-routes')?.addEventListener('input', ()=>{
+  const q = (document.getElementById('search-routes').value || '').trim().toLowerCase();
+  document.querySelectorAll('#routes-list .item').forEach(row=>{
+    const ok = !q || (row.dataset.name || '').includes(q);
+    row.style.display = ok ? 'flex' : 'none';
+  });
+});
 
 function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
 
@@ -323,66 +345,31 @@ function renderParamedicsList(){
 
   items.forEach(p=>{
     const row = document.createElement('div');
-    row.className = 'paramedic-item';
+    row.className = 'item';
     row.dataset.idx = String(p.idx);
 
     const name = document.createElement('div');
-    name.className = 'paramedic-name';
+    name.className = 'name';
     name.textContent = p.name;
 
-    const actions = document.createElement('div');
-    actions.className = 'paramedic-actions';
-
-    const btnGo = document.createElement('button');  // navegar (rumbo/distancia)
-    btnGo.textContent = 'Ir';
-    btnGo.title = 'Navegar a este paramédico';
-
-    const btnZoom = document.createElement('button'); // solo zoom
+    const btnZoom = document.createElement('button');
     btnZoom.textContent = '🔍';
     btnZoom.title = 'Zoom a este paramédico';
 
-    actions.append(btnGo, btnZoom);
-    row.append(name, actions);
+    row.append(name, btnZoom);
     wrap.appendChild(row);
 
-    // Selección visual + highlight
-    const selectRow = ()=>{
-      wrap.querySelectorAll('.paramedic-item').forEach(el=> el.classList.remove('active'));
-      row.classList.add('active');
-      ensureParamedicHighlight();
-      setParamedicHighlight(p.lon, p.lat);
-    };
-
     btnZoom.addEventListener('click', ()=>{
-      selectRow();
       map.flyTo({ center:[p.lon,p.lat], zoom:16, essential:true });
     });
 
-    btnGo.addEventListener('click', ()=>{
-      selectRow();
-      if (!lastPos){
-        setStatus('Primero activa tu ubicación', 'warn');
-        map.flyTo({ center:[p.lon,p.lat], zoom:16 });
-        return;
-      }
-      const { latitude: lat, longitude: lon } = lastPos.coords;
-      const brg = bearing(lat, lon, p.lat, p.lon);
-      const dist = haversine(lat, lon, p.lat, p.lon);
-      setGuide(`Paramédicos: ${p.name} • ${humanDistance(dist)} • Rumbo ${brg.toFixed(0)}°`);
-      drawGuideLine(lon, lat, p.lon, p.lat);
-      map.fitBounds([[lon,lat],[p.lon,p.lat]], { padding:60, duration:600 });
-    });
-
-    // también selecciona al tocar el renglón
+    // Selección visual opcional
     row.addEventListener('click', (e)=>{
-      // evita doble disparo si el click vino de un botón
       if (e.target.tagName === 'BUTTON') return;
-      selectRow();
+      map.flyTo({ center:[p.lon,p.lat], zoom:16, essential:true });
     });
   });
 }
-
-// buscador
 document.getElementById('search-paramedics')?.addEventListener('input', renderParamedicsList);
 
 function renderCheckpointsList(){
@@ -397,64 +384,30 @@ function renderCheckpointsList(){
 
   items.forEach(p=>{
     const row = document.createElement('div');
-    row.className = 'checkpoint-item';
+    row.className = 'item';
     row.dataset.idx = String(p.idx);
 
     const name = document.createElement('div');
-    name.className = 'checkpoint-name';
+    name.className = 'name';
     name.textContent = p.name;
 
-    const actions = document.createElement('div');
-    actions.className = 'checkpoint-actions';
-
-    const btnGo = document.createElement('button');
-    btnGo.textContent = 'Ir';         // navegar
-    btnGo.title = 'Navegar a este checkpoint';
-
     const btnZoom = document.createElement('button');
-    btnZoom.textContent = '🔍';       // solo zoom
+    btnZoom.textContent = '🔍';
     btnZoom.title = 'Zoom a este checkpoint';
 
-    actions.append(btnGo, btnZoom);
-    row.append(name, actions);
+    row.append(name, btnZoom);
     wrap.appendChild(row);
 
-    const selectRow = ()=>{
-      wrap.querySelectorAll('.checkpoint-item').forEach(el=> el.classList.remove('active'));
-      row.classList.add('active');
-      ensureCheckpointHighlight();
-      setCheckpointHighlight(p.lon, p.lat);
-    };
-
     btnZoom.addEventListener('click', ()=>{
-      selectRow();
       map.flyTo({ center:[p.lon,p.lat], zoom:16, essential:true });
-    });
-
-    btnGo.addEventListener('click', ()=>{
-      selectRow();
-      if (!lastPos){
-        setStatus('Primero activa tu ubicación', 'warn');
-        map.flyTo({ center:[p.lon,p.lat], zoom:16 });
-        return;
-      }
-
-      const { latitude: lat, longitude: lon } = lastPos.coords;
-      const brg = bearing(lat, lon, p.lat, p.lon);
-      const dist = haversine(lat, lon, p.lat, p.lon);
-      setGuide(`Checkpoint: ${p.name} • ${humanDistance(dist)} • Rumbo ${brg.toFixed(0)}°`);
-      drawGuideLine(lon, lat, p.lon, p.lat);
-      map.fitBounds([[lon,lat],[p.lon,p.lat]], { padding:60, duration:600 });
     });
 
     row.addEventListener('click', (e)=>{
       if (e.target.tagName === 'BUTTON') return;
-      selectRow();
+      map.flyTo({ center:[p.lon,p.lat], zoom:16, essential:true });
     });
   });
 }
-
-// buscador
 document.getElementById('search-checkpoints')?.addEventListener('input', renderCheckpointsList);
 
 function updateFollowUI(){
