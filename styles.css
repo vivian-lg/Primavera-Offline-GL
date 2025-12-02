@@ -222,6 +222,48 @@ html, body{
   line-height:1;
 }
 
+/* Lista de rutas (claro) */
+#routes-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
+
+#routes-list .item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #fff;                /* claro */
+  border: 1px solid #e6eef4;
+  border-radius: 10px;
+}
+
+#routes-list .swatch{
+  width: 12px; 
+  height: 12px; 
+  border-radius: 3px; 
+  box-shadow: 0 0 0 1px #0001 inset;
+}
+
+#routes-list .name{
+  flex: 1; 
+  min-width: 0; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap;
+}
+
+#routes-list .item button{
+  padding: 2px 6px; 
+  border-radius: 6px; 
+  border: 1px solid #d6e0ea;
+  background: #fff;
+  cursor: pointer;
+}
+#routes-list .item button:hover{ background: #f3f7fb; }
+
+
 .section.collapsed .section-body{ display:none; }
 .section.collapsed .section-toggle{ transform:rotate(-90deg); }
 
