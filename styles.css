@@ -218,3 +218,18 @@ html, body {
 @media (max-width: 800px){
   #panel details[open] > summary { font-weight: 600; }
 }
+
+.paramedic-item, .checkpoint-item{
+  display:flex; align-items:center; gap:8px;
+  padding:6px 8px; border-radius:8px;
+  background:#0f1220; color:#e8eef6; margin:6px 0;
+}
+.paramedic-name, .checkpoint-name{ flex:1; font-weight:600; }
+.paramedic-actions button, .checkpoint-actions button{
+  font-size:12px; padding:4px 8px; border-radius:6px; border:1px solid #324155;
+  background:#192238; color:#e8eef6; cursor:pointer;
+}
+.paramedic-actions button:hover, .checkpoint-actions button:hover{ background:#202b46; }
+.paramedic-item.active, .checkpoint-item.active{ outline:2px solid #3b82f6; }
+
+
