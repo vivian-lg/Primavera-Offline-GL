@@ -257,51 +257,51 @@ async function addOneRoute(file){
     ROUTE_IDS[file] = { srcId, layerId };
 
     // UI fila
-    const list = document.getElementById('routes-list');
-    if (!list) { 
-      setStatus('No encuentro #routes-list en el DOM', 'error'); 
-      return; 
-    }
-    console.log('Agregando fila para', displayName);
+// UI fila (reemplaza tu bloque actual desde "const list = ..." hasta antes de // trailheads)
+const list = document.getElementById('routes-list');
+if (!list) { 
+  setStatus('Falta #routes-list en el DOM', 'error'); 
+  return; 
+}
+console.log('Agregando fila para', displayName);
 
-    const wrap = document.createElement('div'); 
-    wrap.className='item';              // <— usa clase común clara
-    wrap.dataset.name = displayName.toLowerCase();   // <— NUEVO para filtrar
-    const swatch = document.createElement('div'); 
-    swatch.className='swatch'; 
-    swatch.style.background=color;
-    // dentro de addOneRoute(file) justo donde creas la fila:
-    wrap.dataset.file = file;     // <- filas saben qué archivo son
-    chk.dataset.file  = file;     // <- checkbox también
+const row = document.createElement('div');
+row.className = 'item';
+row.dataset.name = (displayName || '').toLowerCase();
 
+const swatchEl = document.createElement('div');
+swatchEl.className = 'swatch';
+swatchEl.style.background = color;
 
-    const chk = document.createElement('input'); 
-    chk.type='checkbox'; 
-    chk.checked=true;
-    
-    const nameEl = document.createElement('div'); 
-    nameEl.className='name'; 
-    nameEl.textContent=displayName;
-    
-    const zoomBtn = document.createElement('button'); 
-    zoomBtn.textContent='🔍';
-    zoomBtn.title='Zoom a esta ruta';
+const checkboxEl = document.createElement('input');
+checkboxEl.type = 'checkbox';
+checkboxEl.checked = true;
+checkboxEl.className = 'route-toggle';
 
-    wrap.append(swatch, chk, nameEl, zoomBtn); list.appendChild(wrap);
-    
-    chk.addEventListener('change', ()=>{
-      // Si el master está apagado, no revivas capas aunque el user checkee
-      if (!routesMasterVisible) {
-        if (map.getLayer(layerId)) map.setLayoutProperty(layerId,'visibility','none');
-        return;
-      }
-      // Si master ON: re-aplica filtros (así respeta green/blue/black)
-      applyDifficultyFilters();
-    });
+const nameEl = document.createElement('div');
+nameEl.className = 'name';
+nameEl.textContent = displayName;
 
-    zoomBtn.addEventListener('click', ()=>{
-      const b=bboxOfGeoJSON(geo); if (b) map.fitBounds(b,{padding:40});
-    });
+const zoomBtn = document.createElement('button');
+zoomBtn.textContent = '🔍';
+zoomBtn.title = 'Zoom a esta ruta';
+
+// Primero creo TODO y luego lo inserto en el DOM
+row.append(swatchEl, checkboxEl, nameEl, zoomBtn);
+list.appendChild(row);
+
+// Listeners DESPUÉS de crear los elementos
+checkboxEl.addEventListener('change', () => {
+  if (map.getLayer(layerId)) {
+    map.setLayoutProperty(layerId, 'visibility', checkboxEl.checked ? 'visible' : 'none');
+  }
+});
+
+zoomBtn.addEventListener('click', () => {
+  const b = bboxOfGeoJSON(geo);
+  if (b) map.fitBounds(b, { padding: 40 });
+});
+
 
     // trailheads
     const ends = firstLastFromGeoJSON(geo);
