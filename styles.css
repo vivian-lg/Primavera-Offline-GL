@@ -207,3 +207,21 @@ html, body{
     transform:translateY(calc(100% - 44px)); /* asoma header */
   }
 }
+
+.section-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:8px; margin-bottom:8px;
+}
+
+.section-toggle{
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:8px;
+  padding:2px 8px;
+  cursor:pointer;
+  line-height:1;
+}
+
+.section.collapsed .section-body{ display:none; }
+.section.collapsed .section-toggle{ transform:rotate(-90deg); }
+
