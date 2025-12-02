@@ -42,68 +42,52 @@
   <!-- Guía (rumbo/distancia) -->
   <div id="guide" class="guide">—</div>
 
-  <!-- Panel capas -->
-  <div id="panel">
-      <div class="panel-header" id="panel-header">
-      <div class="panel-grip"></div>
+ <!-- Panel filtros -->
+<div id="panel">
+  <div class="panel-header" id="panel-header">
     <div class="panel-title">Filtros</div>
+  </div>
+
+  <!-- RUTAS -->
+  <div class="section" id="sec-rutas">
+    <h3>Rutas</h3>
+    <input id="search-routes" class="search" type="search" placeholder="Buscar ruta...">
+    <div class="row" style="margin-top:8px;">
+      <label><input type="checkbox" id="f-green" checked> Verde</label>
+      <label><input type="checkbox" id="f-blue"  checked> Azul</label>
+      <label><input type="checkbox" id="f-black" checked> Negro</label>
     </div>
-    <div class="panel-row">
+    <div class="group-actions">
       <button id="btn-zoom-all">🔍 Zoom a todas</button>
       <button id="btn-hide-all">Ocultar todas</button>
       <button id="btn-show-all">Mostrar todas</button>
     </div>
-    
-    <details open>
-      <summary><strong>Rutas</strong></summary>
-      
-      <details open>
-        <summary><strong>Filtrar por dificultad</strong></summary>
-        <label style="display:inline-flex;align-items:center;gap:6px;margin-right:10px;">
-          <input type="checkbox" id="f-green" checked> Verde
-        </label>
-        <label style="display:inline-flex;align-items:center;gap:6px;margin-right:10px;">
-          <input type="checkbox" id="f-blue" checked> Azul
-        </label>
-        <label style="display:inline-flex;align-items:center;gap:6px;">
-          <input type="checkbox" id="f-black" checked> Negro
-        </label>
-      </details>
-      
-      <div id="routes-list"></div>
-    </details>
-
-    <details open>
-      <summary><strong>Puntos de interés</strong></summary>
-
-      <details open>
-  <summary><strong>Paramédicos</strong></summary>
-  <div class="panel-row" style="margin-bottom:8px;">
-    <input id="search-paramedics" type="search" placeholder="Buscar..." style="flex:1;padding:6px 8px;border-radius:8px;border:1px solid #d6e0ea;">
+    <div id="routes-list" class="list"></div>
   </div>
-  <div id="paramedics-list"></div>
-</details>
 
-      <details open>
-  <summary><strong>Checkpoints</strong></summary>
-  <div class="panel-row" style="margin-bottom:8px;">
-    <input id="search-checkpoints" type="search" placeholder="Buscar..." style="flex:1;padding:6px 8px;border-radius:8px;border:1px solid #d6e0ea;">
+  <!-- PARAMÉDICOS -->
+  <div class="section" id="sec-paramedicos">
+    <h3>Paramédicos</h3>
+    <input id="search-paramedics" class="search" type="search" placeholder="Buscar paramédico...">
+    <div id="paramedics-list" class="list"></div>
+    <div class="group-actions">
+      <label><input type="checkbox" id="toggle-paramedics" checked> Mostrar capa</label>
+      <button id="zoom-paramedics">🔍 Zoom paramédicos</button>
+    </div>
   </div>
-  <div id="checkpoints-list"></div>
-</details>
-      <div class="panel-row">
-        <label style="display:flex;align-items:center;gap:6px;">
-          <input type="checkbox" id="toggle-paramedics" checked> Paramédicos
-        </label>
-        <button id="zoom-paramedics">🔍</button>
 
-        <label style="display:flex;align-items:center;gap:6px;margin-left:10px;">
-          <input type="checkbox" id="toggle-checkpoints" checked> Checkpoints
-        </label>
-        <button id="zoom-checkpoints">🔍</button>
-      </div>
-    </details>
+  <!-- CHECKPOINTS -->
+  <div class="section" id="sec-checkpoints">
+    <h3>Checkpoints</h3>
+    <input id="search-checkpoints" class="search" type="search" placeholder="Buscar checkpoint...">
+    <div id="checkpoints-list" class="list"></div>
+    <div class="group-actions">
+      <label><input type="checkbox" id="toggle-checkpoints" checked> Mostrar capa</label>
+      <button id="zoom-checkpoints">🔍 Zoom checkpoints</button>
+    </div>
   </div>
+</div>
+
 
   <!-- Librerías -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
