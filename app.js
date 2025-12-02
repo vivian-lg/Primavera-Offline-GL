@@ -273,10 +273,11 @@ const swatchEl = document.createElement('div');
 swatchEl.className = 'swatch';
 swatchEl.style.background = color;
 
-const checkboxEl = document.createElement('input');
-checkboxEl.type = 'checkbox';
-checkboxEl.checked = true;
-checkboxEl.className = 'route-toggle';
+const chk = document.createElement('input');
+chk.type = 'checkbox';
+chk.checked = true;
+chk.className = 'route-toggle';   // <— importante
+
 
 const nameEl = document.createElement('div');
 nameEl.className = 'name';
@@ -328,21 +329,11 @@ function loadAllRoutes(){ ROUTE_FILES.forEach(addOneRoute); }
 document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
   routesMasterVisible = false;
 
+  // Desmarcar filtros y checks + disparar change
   setAllDifficultyFilters(false);
-  setAllRouteToggles(false);
-  
-  // Desmarca filtros (opcional):
- ['f-green','f-blue','f-black'].forEach(id=>{
-    const el = document.getElementById(id);
-    if (el) el.checked = false;
-  });
+  setAllRouteToggles(false, true);
 
-  // Desmarca cada checkbox de ruta en UI (opcional y recomendado):
-  document.querySelectorAll('#routes-list .item input[type="checkbox"]').forEach(chk=>{
-    chk.checked = false;
-  });
-
-  // Fuerza oculto de TODAS las capas
+  // Ocultar capas por si alguna quedó visible
   for (const f in ROUTE_IDS){
     const { layerId } = ROUTE_IDS[f] || {};
     if (layerId && map.getLayer(layerId)){
@@ -354,19 +345,17 @@ document.getElementById('btn-hide-all')?.addEventListener('click', ()=>{
 document.getElementById('btn-show-all')?.addEventListener('click', ()=>{
   routesMasterVisible = true;
 
-  // Marca filtros y checks por ruta
+  // Marcar filtros y checks + disparar change
   setAllDifficultyFilters(true);
-  setAllRouteToggles(true);
+  setAllRouteToggles(true, true);
 
-  // Asegura visibilidad en el mapa
+  // Asegurar visibilidad
   for (const f in ROUTE_IDS){
     const { layerId } = ROUTE_IDS[f] || {};
     if (layerId && map.getLayer(layerId)){
       map.setLayoutProperty(layerId, 'visibility', 'visible');
     }
   }
-
-  // Reaplica lógica de filtros por si acaso
   applyDifficultyFilters();
 });
 
@@ -588,18 +577,27 @@ function applyDifficultyFilters(){
     }
     return;
   }
-  function setAllDifficultyFilters(state){
+  
+function setAllDifficultyFilters(state){
   ['f-green','f-blue','f-black'].forEach(id=>{
     const el = document.getElementById(id);
-    if (el) el.checked = !!state;
+    if (el){
+      el.checked = !!state;
+      el.dispatchEvent(new Event('change', {bubbles:true}));
+    }
   });
 }
 
-function setAllRouteToggles(state){
-  document.querySelectorAll('#routes-list .route-toggle').forEach(chk=>{
+// Si prefieres no depender de la clase, puedes usar el selector por contenedor:
+function setAllRouteToggles(state, trigger=false){
+  document.querySelectorAll('#routes-list input[type="checkbox"]').forEach(chk=>{
     chk.checked = !!state;
+    if (trigger){
+      chk.dispatchEvent(new Event('change', {bubbles:true}));
+    }
   });
 }
+
 
 
   const showGreen = document.getElementById('f-green')?.checked;
